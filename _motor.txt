@@ -1,0 +1,98 @@
+﻿async function responderAcordo(id, status) {
+    const container = document.getElementById('listaAcordos');
+    if (container) container.innerHTML = '<div class="text-center py-8 text-slate-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><br>Processando...</div>';
+
+    await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
+
+    if (status === 'ACEITO') {
+        showToast('⏳ Efetivando troca...', 'info');
+        const { data: acordo } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
+        
+        if (acordo) {
+            const ano = currentDate.getFullYear();
+            const mes = currentDate.getMonth();
+            const monthKey = 'shifts_' + ano + '_' + mes;
+            const configKey = 'CONFIG'; 
+
+            const emailSol = acordo.email_solicitante;
+            const emailRec = acordo["receptor de e-mail"];
+            
+            const diaOrig = String(acordo.dia_ofertado).padStart(2,'0');
+            const hospOrigStr = String(acordo.hospital_ofertado).toLowerCase();
+            const dateOrigKey = ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaOrig;
+
+            const isContra = !!acordo.dia_resposta;
+            const diaResp = isContra ? String(acordo.dia_resposta).padStart(2,'0') : null;
+            const hospRespStr = isContra ? String(acordo.resposta_hospital).toLowerCase() : null;
+            const dateRespKey = isContra ? ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaResp : null;
+
+            const getHospId = async (email, hospStr) => {
+                if (!hospStr) return null;
+                let cfg = {};
+                if (email === currentUser) { cfg = config; } 
+                else {
+                    const { data } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', email).eq('chave_do_mes', configKey).maybeSingle(); 
+                    if (data && data.dados) cfg = data.dados;
+                }
+                for (const k in cfg) { if (cfg[k] && cfg[k].name && cfg[k].name.toLowerCase().includes(hospStr)) return k; }
+                return null;
+            };
+
+            const hospIdSol_Orig = await getHospId(emailSol, hospOrigStr);
+            const hospIdRec_Orig = await getHospId(emailRec, hospOrigStr) || hospIdSol_Orig;
+            let hospIdSol_Resp = null, hospIdRec_Resp = null;
+            if (isContra) {
+                hospIdRec_Resp = await getHospId(emailRec, hospRespStr);
+                hospIdSol_Resp = await getHospId(emailSol, hospRespStr) || hospIdRec_Resp;
+            }
+
+            const nameRec = emailRec.split('@')[0].substring(0,6).toUpperCase();
+            const nameSol = emailSol.split('@')[0].substring(0,6).toUpperCase();
+
+            // ATUALIZA SOLICITANTE
+            let shiftsSol = (currentUser === emailSol) ? JSON.parse(JSON.stringify(shifts)) : {};
+            if (currentUser !== emailSol) {
+                const { data: bkSol } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', emailSol).eq('chave_do_mes', monthKey).maybeSingle();
+                if (bkSol && bkSol.dados) shiftsSol = bkSol.dados;
+            }
+            if (hospIdSol_Orig) {
+                if (!shiftsSol[dateOrigKey]) shiftsSol[dateOrigKey] = [];
+                shiftsSol[dateOrigKey] = shiftsSol[dateOrigKey].filter(i => !String(i).startsWith(hospIdSol_Orig + '-'));
+                shiftsSol[dateOrigKey].push(hospIdSol_Orig + '-SO-' + (isContra ? diaResp : diaOrig) + '-' + nameRec);
+            }
+            if (isContra && hospIdSol_Resp) {
+                if (!shiftsSol[dateRespKey]) shiftsSol[dateRespKey] = [];
+                shiftsSol[dateRespKey] = shiftsSol[dateRespKey].filter(i => !String(i).startsWith(hospIdSol_Resp + '-'));
+                shiftsSol[dateRespKey].push(hospIdSol_Resp + '-SI-' + diaOrig + '-' + nameRec);
+            }
+            if (currentUser !== emailSol) await _supabase.from('backup_gp').upsert({ id_do_proprietario: emailSol, chave_do_mes: monthKey, dados: shiftsSol });
+
+            // ATUALIZA RECEPTOR
+            let shiftsRec = (currentUser === emailRec) ? JSON.parse(JSON.stringify(shifts)) : {};
+            if (currentUser !== emailRec) {
+                const { data: bkRec } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', emailRec).eq('chave_do_mes', monthKey).maybeSingle();
+                if (bkRec && bkRec.dados) shiftsRec = bkRec.dados;
+            }
+            if (hospIdRec_Orig) {
+                if (!shiftsRec[dateOrigKey]) shiftsRec[dateOrigKey] = [];
+                shiftsRec[dateOrigKey] = shiftsRec[dateOrigKey].filter(i => !String(i).startsWith(hospIdRec_Orig + '-'));
+                shiftsRec[dateOrigKey].push(hospIdRec_Orig + '-SI-' + (isContra ? diaResp : diaOrig) + '-' + nameSol);
+            }
+            if (isContra && hospIdRec_Resp) {
+                if (!shiftsRec[dateRespKey]) shiftsRec[dateRespKey] = [];
+                shiftsRec[dateRespKey] = shiftsRec[dateRespKey].filter(i => !String(i).startsWith(hospIdRec_Resp + '-'));
+                shiftsRec[dateRespKey].push(hospIdRec_Resp + '-SO-' + diaOrig + '-' + nameSol);
+            }
+            if (currentUser !== emailRec) await _supabase.from('backup_gp').upsert({ id_do_proprietario: emailRec, chave_do_mes: monthKey, dados: shiftsRec });
+
+            if (currentUser === emailRec) { shifts = shiftsRec; saveData(); }
+            if (currentUser === emailSol) { shifts = shiftsSol; saveData(); }
+            showToast('✅ ACORDO FECHADO!', 'success');
+            if (typeof Swal !== 'undefined') Swal.close();
+            await syncWithCloud(true);
+            renderCalendar();
+            return;
+        }
+    }
+    carregarAcordos();
+}

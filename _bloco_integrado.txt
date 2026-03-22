@@ -1,0 +1,173 @@
+﻿async function selecionarColega(emailColega, nomeColega) {
+    const dia = window._remoteSwapDay;
+    const hospital = window._remoteSwapHospital;
+    if (!dia || !hospital) { showToast('Erro: dados ausentes', 'error'); return; }
+    const confirmado = confirm('Enviar proposta de troca do dia ' + dia + ' (' + hospital + ') para ' + nomeColega + '?');
+    if (!confirmado) return;
+    const codigo = 'ME-' + Date.now().toString().slice(-6);
+    // CORREÇÃO CRÍTICA: Nome da coluna entre aspas por causa dos espaços e acento
+    const { error } = await _supabase.from('gp_acordos').insert({
+        codigo: codigo,
+        email_solicitante: currentUser,
+        dia_ofertado: String(dia),
+        hospital_ofertado: hospital,
+        "receptor de e-mail": emailColega,
+        status: 'PENDENTE'
+    });
+    if (error) { showToast('Erro ao enviar!', 'error'); console.error(error); return; }
+    showToast('Proposta enviada para ' + nomeColega + '!', 'success');
+    closeRemoteSwap();
+}
+
+async function carregarAcordos(userParam) {
+    const _u = (userParam || currentUser || "").toLowerCase().trim();
+    const container = document.getElementById("listaAcordos");
+    if (!container) return;
+    try {
+        const { data, error } = await _supabase.from("gp_acordos").select("*");
+        if (error) throw error;
+        let _merged = (data || []).filter(a => 
+            (a.email_solicitante || "").toLowerCase().trim() === _u || 
+            (a["receptor de e-mail"] || "").toLowerCase().trim() === _u
+        );
+        _merged.sort((a,b) => new Date(b.criado_em || b.created_at || 0) - new Date(a.criado_em || a.created_at || 0));
+        if (_merged.length === 0) {
+            container.innerHTML = '<div class="py-10 text-slate-500 text-xs font-black uppercase text-center">Nenhum acordo</div>';
+            return;
+        }
+        container.innerHTML = _merged.map(a => {
+            const isOut = (a.email_solicitante || "").toLowerCase().trim() === _u;
+            let botoesHTML = "";
+            let st = (a.status || "").toUpperCase();
+            if (!isOut && st === "PENDENTE") {
+                botoesHTML = `<div class="flex gap-2 mt-4">
+                    <button onclick="abrirContraproposta('${a.id}')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase shadow-lg"><i class="fas fa-reply mr-1"></i> Oferecer Dia</button>
+                    <button onclick="responderAcordo('${a.id}', 'RECUSADO')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">Recusar</button>
+                </div>`;
+            } else if (isOut && st === "CONTRAPROPOSTA") {
+                botoesHTML = `<div class="bg-indigo-900/30 border border-indigo-500/30 p-3 rounded-lg mt-3">
+                    <div class="text-indigo-400 text-[10px] font-black uppercase mb-1">📋 Resposta do colega</div>
+                    <div class="text-white text-xs font-bold mb-3">Oferece o Dia ${a.dia_resposta || "?"} (${a.resposta_hospital || "?"})</div>
+                    <div class="flex gap-2">
+                        <button onclick="responderAcordo('${a.id}', 'ACEITO')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase shadow-lg">✅ Fechar Acordo</button>
+                        <button onclick="responderAcordo('${a.id}', 'RECUSADO')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">❌ Recusar</button>
+                    </div>
+                </div>`;
+            } else if (!isOut && st === "CONTRAPROPOSTA") {
+                botoesHTML = `<div class="mt-3 text-[10px] text-indigo-400 font-bold uppercase text-center border border-indigo-500/30 bg-indigo-900/20 py-2 rounded-lg shadow-inner"><i class="fas fa-clock mr-1"></i> Aguardando Colega</div>`;
+            }
+            let bgStatus = st === 'ACEITO' ? 'text-emerald-400' : (st === 'RECUSADO' ? 'text-red-400' : 'text-slate-400');
+            const emailExibicao = isOut ? a["receptor de e-mail"] : a.email_solicitante;
+            return `<div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 mb-3 text-left shadow-lg">
+                <div class="flex justify-between mb-2">
+                    <span class="text-[9px] font-black uppercase ${isOut ? "text-blue-400" : "text-purple-400"}">${isOut ? "📤 Enviada" : "📥 Recebida"}</span>
+                    <span class="text-[9px] font-bold ${bgStatus} uppercase">${st}</span>
+                </div>
+                <div class="text-sm font-bold text-white">Dia ${a.dia_ofertado} - ${a.hospital_ofertado || ""}</div>
+                <div class="text-[10px] text-slate-400 mt-1">${isOut ? "Para: " : "De: "} ${emailExibicao || "---"}</div>
+                ${botoesHTML}
+            </div>`;
+        }).join("");
+    } catch (err) { container.innerHTML = `<div class="py-6 text-red-400 text-xs text-center font-bold">ERRO: ${err.message}</div>`; }
+}
+
+async function responderAcordo(id, status) {
+    const container = document.getElementById('listaAcordos');
+    if (container) container.innerHTML = '<div class="text-center py-8 text-slate-500"><i class="fas fa-spinner fa-spin text-2xl mb-2"></i><br>Processando...</div>';
+    await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
+    if (status === 'ACEITO') {
+        showToast('⏳ Efetivando troca...', 'info');
+        const { data: acordo } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
+        if (acordo) {
+            const ano = currentDate.getFullYear();
+            const mes = currentDate.getMonth();
+            const monthKey = 'shifts_' + ano + '_' + mes;
+            const emailSol = acordo.email_solicitante;
+            const emailRec = acordo["receptor de e-mail"];
+            const dateOrigKey = ano + '-' + String(mes+1).padStart(2,'0') + '-' + String(acordo.dia_ofertado).padStart(2,'0');
+            const dateRespKey = ano + '-' + String(mes+1).padStart(2,'0') + '-' + String(acordo.dia_resposta).padStart(2,'0');
+            const getHospId = async (email, hospStr) => {
+                if (!hospStr) return null;
+                const { data } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', email).eq('chave_do_mes', 'CONFIG').maybeSingle(); 
+                const cfg = (data && data.dados) ? data.dados : (email === currentUser ? config : {});
+                for (const k in cfg) { if (cfg[k] && cfg[k].name && cfg[k].name.toLowerCase().includes(hospStr.toLowerCase())) return k; }
+                return null;
+            };
+            const hospIdSol_Orig = await getHospId(emailSol, acordo.hospital_ofertado);
+            const hospIdRec_Orig = await getHospId(emailRec, acordo.hospital_ofertado) || hospIdSol_Orig;
+            const hospIdRec_Resp = await getHospId(emailRec, acordo.resposta_hospital);
+            const hospIdSol_Resp = await getHospId(emailSol, acordo.resposta_hospital) || hospIdRec_Resp;
+            const nameRec = emailRec ? emailRec.split('@')[0].substring(0,6).toUpperCase() : 'COLEGA';
+            const nameSol = emailSol ? emailSol.split('@')[0].substring(0,6).toUpperCase() : 'COLEGA';
+
+            let shiftsSol = (currentUser === emailSol) ? JSON.parse(JSON.stringify(shifts)) : {};
+            if (currentUser !== emailSol) {
+                const { data } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', emailSol).eq('chave_do_mes', monthKey).maybeSingle();
+                if (data && data.dados) shiftsSol = data.dados;
+            }
+            if (hospIdSol_Orig) {
+                shiftsSol[dateOrigKey] = (shiftsSol[dateOrigKey] || []).filter(i => !String(i).startsWith(hospIdSol_Orig + '-'));
+                shiftsSol[dateOrigKey].push(hospIdSol_Orig + '-SO-' + String(acordo.dia_resposta).padStart(2,'0') + '-' + nameRec);
+            }
+            if (hospIdSol_Resp) {
+                shiftsSol[dateRespKey] = (shiftsSol[dateRespKey] || []).filter(i => !String(i).startsWith(hospIdSol_Resp + '-'));
+                shiftsSol[dateRespKey].push(hospIdSol_Resp + '-SI-' + String(acordo.dia_ofertado).padStart(2,'0') + '-' + nameRec);
+            }
+            if (currentUser !== emailSol) await _supabase.from('backup_gp').upsert({ id_do_proprietario: emailSol, chave_do_mes: monthKey, dados: shiftsSol });
+
+            let shiftsRec = (currentUser === emailRec) ? JSON.parse(JSON.stringify(shifts)) : {};
+            if (currentUser !== emailRec) {
+                const { data } = await _supabase.from('backup_gp').select('dados').eq('id_do_proprietario', emailRec).eq('chave_do_mes', monthKey).maybeSingle();
+                if (data && data.dados) shiftsRec = data.dados;
+            }
+            if (hospIdRec_Orig) {
+                shiftsRec[dateOrigKey] = (shiftsRec[dateOrigKey] || []).filter(i => !String(i).startsWith(hospIdRec_Orig + '-'));
+                shiftsRec[dateOrigKey].push(hospIdRec_Orig + '-SI-' + String(acordo.dia_resposta).padStart(2,'0') + '-' + nameSol);
+            }
+            if (hospIdRec_Resp) {
+                shiftsRec[dateRespKey] = (shiftsRec[dateRespKey] || []).filter(i => !String(i).startsWith(hospIdRec_Resp + '-'));
+                shiftsRec[dateRespKey].push(hospIdRec_Resp + '-SO-' + String(acordo.dia_ofertado).padStart(2,'0') + '-' + nameSol);
+            }
+            if (currentUser !== emailRec) await _supabase.from('backup_gp').upsert({ id_do_proprietario: emailRec, chave_do_mes: monthKey, dados: shiftsRec });
+
+            if (currentUser === emailRec) { shifts = shiftsRec; saveData(); }
+            if (currentUser === emailSol) { shifts = shiftsSol; saveData(); }
+            showToast('✅ ACORDO FECHADO!', 'success');
+            if (typeof Swal !== 'undefined') Swal.close();
+            await syncWithCloud(true);
+            renderCalendar();
+            return;
+        }
+    }
+    carregarAcordos();
+}
+
+async function abrirContraproposta(id) {
+    const { value: formValues } = await Swal.fire({
+        title: '<span class="text-white text-sm font-black uppercase">Qual dia você oferece?</span>',
+        html: '<div class="text-left mt-2">' +
+            '<label class="text-slate-400 text-[10px] font-bold uppercase">Dia do seu Plantão:</label>' +
+            '<input id="swal-dia" type="number" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white mb-3" placeholder="Ex: 30">' +
+            '<label class="text-slate-400 text-[10px] font-bold uppercase">Hospital:</label>' +
+            '<input id="swal-hosp" type="text" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white uppercase" placeholder="Ex: UDI">' +
+            '</div>',
+        background: '#0f172a', showCancelButton: true, confirmButtonText: 'ENVIAR PROPOSTA', confirmButtonColor: '#4f46e5',
+        customClass: { popup: 'rounded-3xl border border-slate-700' },
+        preConfirm: () => {
+            const dia = document.getElementById('swal-dia').value;
+            const hosp = document.getElementById('swal-hosp').value;
+            if (!dia || !hosp) { Swal.showValidationMessage('Preencha os dois campos'); return false; }
+            return { dia, hosp };
+        }
+    });
+    if (formValues) {
+        showToast('⏳ Enviando oferta...', 'info');
+        const { error } = await _supabase.from('gp_acordos').update({
+            status: 'CONTRAPROPOSTA',
+            dia_resposta: formValues.dia,
+            resposta_hospital: formValues.hosp.toUpperCase()
+        }).eq('id', id);
+        if (error) { showToast('Erro ao enviar: ' + error.message, 'error'); } 
+        else { showToast('✅ Oferta enviada com sucesso!', 'success'); carregarAcordos(); }
+    }
+}

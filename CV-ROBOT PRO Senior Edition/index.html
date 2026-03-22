@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Curriculum Robot v1.0 - Edição Inline</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
+    <style>
+        @page { size: A4; margin: 0; }
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background-color: white !important; }
+            .print-area { margin: 0 !important; box-shadow: none !important; width: 100% !important; }
+            [contenteditable="true"] { background: transparent !important; }
+        }
+        
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            padding-top: env(safe-area-inset-top);
+        }
+
+        .drag-area { border: 2px dashed #1e40af; transition: all 0.3s ease; }
+        .drag-area.active { background-color: #eff6ff; border-style: solid; scale: 1.02; }
+        
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+        [contenteditable="true"]:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            cursor: text;
+        }
+        [contenteditable="true"]:focus {
+            background-color: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
+        }
+    </style>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+    </script>
+</head>
+<body class="bg-gray-100 font-sans text-gray-900 min-h-screen">
+
+    <div class="no-print p-4 max-w-[1400px] mx-auto">
+        <header class="mb-6 flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-gray-200">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-black text-blue-800 tracking-tighter uppercase">Curriculum Robot</h1>
+                <p class="text-[10px] md:text-xs text-gray-500 font-bold tracking-widest uppercase">Editor Inline v1.0 | Auto-Save Ativo</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="resetEditor()" class="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors">
+                    Resetar
+                </button>
+                <div class="bg-blue-800 text-white px-4 py-2 rounded-lg text-[10px] font-black uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Sistema Pronto
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <div class="lg:col-span-3 space-y-4">
+                <div id="drop-zone" class="drag-area bg-white p-6 rounded-2xl text-center cursor-pointer shadow-sm hover:shadow-md flex flex-col items-center justify-center min-h-[120px]">
+                    <svg class="w-8 h-8 text-blue-800 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    <p class="text-blue-800 font-black text-xs uppercase tracking-widest">Arraste o PDF Aqui</p>
+                    <p class="text-[9px] text-gray-500 mt-1 uppercase">Para extrair o texto bruto</p>
+                    <input type="file" id="file-input" accept="application/pdf" class="hidden">
+                </div>
+
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[400px]">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[10px] font-black uppercase text-blue-800">Texto Extraído</label>
+                        <span id="extract-status" class="text-[9px] font-bold text-gray-400 uppercase">Aguardando...</span>
+                    </div>
+                    <textarea id="extracted-text" class="w-full flex-grow text-[10px] border border-gray-200 p-3 rounded-xl bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono" placeholder="O texto do currículo original aparecerá aqui."></textarea>
+                    
+                    <button id="btn-autofill" onclick="runSmartExtraction()" class="hidden w-full mt-4 bg-gradient-to-r from-blue-600 to-blue-800 text-white font-black py-3 rounded-xl hover:from-blue-700 hover:to-blue-900 transition-all text-[10px] tracking-widest shadow-lg flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        AUTO-PREENCHER CURRÍCULO
+                    </button>
+
+                    <label class="block text-[10px] font-black uppercase mt-4 mb-2 text-blue-800 border-t pt-4">Alterar Foto (Opcional)</label>
+                    <input type="file" id="photo-input" accept="image/*" class="w-full text-[10px] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="updatePhoto(event)">
+                </div>
+            </div>
+
+            <div class="lg:col-span-9 bg-white rounded-3xl shadow-2xl p-4 overflow-auto max-h-[85vh] border-4 border-gray-200 flex justify-center">
+                <div class="origin-top scale-[0.50] sm:scale-[0.70] md:scale-[0.85] lg:scale-[1] transition-transform duration-300">
+                    
+                    /* INICIO: BLOCO VALIDADO */
+                    <div id="cv-editor-area" class="w-[210mm] min-h-[297mm] bg-white p-[12mm] flex flex-col shadow-inner print-area relative group">
+                        
+                        <header class="flex justify-between items-end border-b-4 border-blue-800 pb-4 shrink-0">
+                            <div class="w-full">
+                                <h1 contenteditable="true" class="text-3xl font-black uppercase tracking-tighter leading-none text-gray-900 block w-full">Nome do Profissional</h1>
+                                <p contenteditable="true" class="text-blue-700 font-bold text-lg mt-2 uppercase tracking-widest block w-full">Cargo / Especialidade</p>
+                            </div>
+                        </header>
+                        
+                        <div class="flex gap-10 mt-8 flex-grow">
+                            <div class="w-[35%] border-r-2 border-blue-800 pr-6 space-y-8">
+                                <section>
+                                    <h3 class="text-blue-800 font-black border-b-2 border-blue-100 mb-3 uppercase text-xs italic">• Formação</h3>
+                                    <div contenteditable="true" class="space-y-4 text-[11px] min-h-[50px]">
+                                        <p><strong>Grau de Instrução</strong><br>Instituição - Ano</p>
+                                    </div>
+                                </section>
+                                <section>
+                                    <h3 class="text-blue-800 font-black border-b-2 border-blue-100 mb-3 uppercase text-xs italic">• Dados Pessoais</h3>
+                                    <div contenteditable="true" class="space-y-2 text-[11px] min-h-[50px]">
+                                        <p><strong>Idade:</strong> XX anos</p>
+                                        <p><strong>Endereço:</strong> Cidade - UF</p>
+                                        <p><strong>Contato:</strong> (00) 00000-0000</p>
+                                        <p><strong>Email:</strong> email@exemplo.com</p>
+                                    </div>
+                                </section>
+                            </div>
+
+                            <div class="w-[65%] flex flex-col justify-between">
+                                <div class="flex justify-end mb-6 shrink-0">
+                                    <div class="w-32 h-40 border-2 border-blue-800 overflow-hidden bg-gray-50 shadow-md relative group/photo">
+                                        <img id="cv-photo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="w-full h-full object-cover hidden">
+                                        <div id="cv-photo-placeholder" class="flex items-center justify-center h-full text-[8px] text-gray-400 font-bold uppercase p-4 text-center">
+                                            Sem Foto
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <section class="flex-grow">
+                                    <h3 class="text-blue-800 font-black border-b-2 border-blue-800 mb-4 uppercase text-xs italic">• Experiência Profissional</h3>
+                                    <div contenteditable="true" class="space-y-6 text-[11px] min-h-[150px]">
+                                        <div class="border-l-4 border-blue-800 pl-4">
+                                            <p class="font-bold text-blue-800 uppercase">Nome da Empresa</p>
+                                            <p class="text-[10px] italic text-gray-600">Cargo Ocupado | Período</p>
+                                            <p class="mt-1 text-gray-700 leading-tight">Descrição detalhada das atividades e responsabilidades assumidas neste cargo.</p>
+                                        </div>
+                                        <div class="pl-4">
+                                            <p class="font-bold uppercase">Nome da Empresa Anterior</p>
+                                            <p class="text-[10px] italic text-gray-500">Cargo Ocupado | Período</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="mt-10 bg-blue-50 p-4 rounded-r-xl border-l-4 border-blue-800 shrink-0">
+                                    <h3 class="text-blue-800 font-bold text-[10px] uppercase mb-1">Objetivo</h3>
+                                    <div contenteditable="true" class="text-[11px] italic text-gray-700 min-h-[30px]">
+                                        "Escreva o objetivo profissional de forma clara e direta."
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                    /* FIM: BLOCO VALIDADO */
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-print fixed bottom-8 right-8 z-50">
+        <button onclick="window.print()" class="bg-green-600 flex items-center gap-2 text-white px-8 py-4 rounded-full font-black shadow-[0_10px_25px_-5px_rgba(22,163,74,0.5)] hover:bg-green-700 hover:scale-105 transition-all uppercase text-xs tracking-widest border-2 border-green-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            Gerar PDF Final
+        </button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'cv_robot_pro_data';
+        const editorArea = document.getElementById('cv-editor-area');
+        
+        // --- AUTO-SAVE ---
+        editorArea.addEventListener('input', saveData);
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, editorArea.innerHTML);
+        }
+
+        function loadData() {
+            const savedHTML = localStorage.getItem(STORAGE_KEY);
+            if (savedHTML) {
+                editorArea.innerHTML = savedHTML;
+            }
+        }
+
+        function resetEditor() {
+            if(confirm("Tem certeza? Isso apagará o currículo atual e restaurará o modelo em branco.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        function updatePhoto(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                document.getElementById('cv-photo').src = e.target.result;
+                document.getElementById('cv-photo').classList.remove('hidden');
+                document.getElementById('cv-photo-placeholder').classList.add('hidden');
+                saveData();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- ARRASTAR E SOLTAR + PDF.JS ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const statusText = document.getElementById('extract-status');
+        const textArea = document.getElementById('extracted-text');
+        const btnAutofill = document.getElementById('btn-autofill');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+            document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('active'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('active'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => handleFiles(e.dataTransfer.files), false);
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files), false);
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            const file = files[0];
+            
+            if (file.type !== 'application/pdf') {
+                alert("Por favor, envie apenas arquivos PDF.");
+                return;
+            }
+
+            statusText.innerText = "Extraindo...";
+            statusText.className = "text-[9px] font-bold text-blue-500 uppercase animate-pulse";
+            btnAutofill.classList.add('hidden'); // Esconde o botão durante nova extração
+            
+            const fileReader = new FileReader();
+            fileReader.onload = async function() {
+                const typedarray = new Uint8Array(this.result);
+                try {
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    let fullText = '';
+                    
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        const strings = textContent.items.map(item => item.str);
+                        fullText += strings.join(' ') + '\n';
+                    }
+                    
+                    textArea.value = fullText.replace(/\s{2,}/g, ' ').trim();
+                    statusText.innerText = "Extraído com Sucesso!";
+                    statusText.className = "text-[9px] font-bold text-green-500 uppercase";
+                    
+                    // Mostra o botão mágico!
+                    btnAutofill.classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error("Erro ao ler PDF:", error);
+                    statusText.innerText = "Falha na Extração";
+                    statusText.className = "text-[9px] font-bold text-red-500 uppercase";
+                }
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+
+        // --- ALGORITMO DE EXTRAÇÃO INTELIGENTE (HEURÍSTICA) ---
+        // Respeitando o Protocolo de Imutabilidade, este script não altera a estrutura HTML,
+        // apenas injeta os dados encontrados navegando pelo DOM da área validada.
+        function runSmartExtraction() {
+            const text = textArea.value;
+            if (!text) return;
+
+            // 1. Buscando padrões via Regex
+            const emailMatch = text.match(/[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/);
+            const email = emailMatch ? emailMatch[0] : "Não encontrado";
+            
+            const phoneMatch = text.match(/(?:\(?\d{2}\)?\s?)?(?:9\s?)?\d{4}-?\d{4}/);
+            const phone = phoneMatch ? phoneMatch[0] : "Não encontrado";
+            
+            // Pega a primeira linha de texto decente para ser o Nome
+            const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+            const name = lines.length > 0 ? lines[0] : "Nome do Profissional";
+
+            // 2. Injetando no Layout Validado (Sem quebrar o HTML original)
+            const editor = document.getElementById('cv-editor-area');
+            
+            // Nome
+            const nameEl = editor.querySelector('h1');
+            if(nameEl) nameEl.innerText = name;
+
+            // Dados Pessoais (Procurando a seção certa)
+            const headers = Array.from(editor.querySelectorAll('h3'));
+            const personalHeader = headers.find(h => h.innerText.toLowerCase().includes('dados pessoais'));
+            
+            if (personalHeader) {
+                const personalDiv = personalHeader.nextElementSibling;
+                // Mantém a formatação original que criamos
+                personalDiv.innerHTML = `
+                    <p><strong>Idade:</strong> XX anos</p>
+                    <p><strong>Endereço:</strong> Cidade - UF</p>
+                    <p><strong>Contato:</strong> ${phone}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                `;
+            }
+
+            // Força o salvamento das injeções
+            saveData();
+            
+            // Alerta visual de sucesso para o usuário
+            const btn = document.getElementById('btn-autofill');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<svg class="w-4 h-4 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> DADOS INJETADOS COM SUCESSO!`;
+            btn.classList.replace('from-blue-600', 'from-green-600');
+            btn.classList.replace('to-blue-800', 'to-green-800');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.replace('from-green-600', 'from-blue-600');
+                btn.classList.replace('to-green-800', 'to-blue-800');
+            }, 3000);
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>

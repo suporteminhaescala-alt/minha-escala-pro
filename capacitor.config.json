@@ -1,0 +1,10 @@
+{
+    "appId": "com.gestorpro.app",
+    "appName": "Minha Escala",
+    "webDir": "dist",
+    "bundledWebRuntime": false,
+    "server": {
+        "androidScheme": "https",
+        "cleartext": true
+    }
+}

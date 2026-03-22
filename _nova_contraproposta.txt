@@ -1,0 +1,35 @@
+﻿async function abrirContraproposta(id) {
+    const { value: formValues } = await Swal.fire({
+        title: '<span class="text-white text-sm font-black uppercase tracking-widest">Qual dia você oferece?</span>',
+        html: '<div class="text-left mt-2">' +
+            '<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Dia do seu Plantão:</label>' +
+            '<input id="swal-dia" type="number" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white mb-3 focus:border-indigo-500 outline-none transition-colors" placeholder="Ex: 15">' +
+            '<label class="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Hospital:</label>' +
+            '<input id="swal-hosp" type="text" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white uppercase focus:border-indigo-500 outline-none transition-colors" placeholder="Ex: UDI">' +
+            '</div>',
+        background: '#0f172a', showCancelButton: true, confirmButtonText: 'ENVIAR PROPOSTA', confirmButtonColor: '#4f46e5', cancelButtonText: 'Cancelar',
+        customClass: { popup: 'rounded-3xl border border-slate-700 shadow-2xl' },
+        preConfirm: () => {
+            const dia = document.getElementById('swal-dia').value;
+            const hosp = document.getElementById('swal-hosp').value;
+            if (!dia || !hosp) { Swal.showValidationMessage('Preencha os dois campos'); return false; }
+            return { dia, hosp };
+        }
+    });
+    
+    if (formValues) {
+        showToast('⏳ Enviando oferta...', 'info');
+        const { error } = await _supabase.from('gp_acordos').update({
+            status: 'CONTRAPROPOSTA',
+            dia_resposta: formValues.dia,
+            resposta_hospital: formValues.hosp.toUpperCase()
+        }).eq('id', id);
+        
+        if (error) {
+            showToast('Erro ao enviar: ' + error.message, 'error');
+        } else {
+            showToast('✅ Oferta enviada com sucesso!', 'success');
+            carregarAcordos(); 
+        }
+    }
+}

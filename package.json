@@ -1,0 +1,32 @@
+{
+  "name": "gestor-pro",
+  "version": "1.0.0",
+  "description": "Gestor Pro Suite Administrativa",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && javascript-obfuscator dist --output dist --compact true --control-flow-flattening true --control-flow-flattening-threshold 1 --dead-code-injection true --dead-code-injection-threshold 1 --debug-protection true --disable-console-output true --identifier-names-generator hexadecimal --self-defending true --string-array true --transform-object-keys true --unicode-escape-sequence false",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor-community/file-opener": "^8.0.0",
+    "@capacitor-community/text-to-speech": "^8.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/browser": "^8.0.1",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "onesignal-cordova-plugin": "^5.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.0.0",
+    "autoprefixer": "^10.4.17",
+    "javascript-obfuscator": "^4.1.0",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "vite": "^5.2.0",
+    "vite-plugin-pwa": "^1.2.0"
+  }
+}

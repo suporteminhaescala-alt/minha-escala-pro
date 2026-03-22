@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "969463763958",
+    "project_id": "minha-escala-d6358",
+    "storage_bucket": "minha-escala-d6358.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969463763958:android:5fef70bbdd84e2363bedd7",
+        "android_client_info": {
+          "package_name": "com.gestorpro.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChewbwwAT15q_c_wU5f0bNq_B8A5GvW1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969463763958:android:07847248b0d7c06d3bedd7",
+        "android_client_info": {
+          "package_name": "com.suaempresa.minhaescala"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChewbwwAT15q_c_wU5f0bNq_B8A5GvW1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,63 @@
+﻿async function carregarAcordos(userParam) {
+    const _u = (userParam || currentUser || "").toLowerCase().trim();
+    const container = document.getElementById("listaAcordos");
+    if (!container) return;
+    try {
+        const { data, error } = await _supabase.from("gp_acordos").select("*");
+        if (error) throw error;
+        
+        let _merged = (data || []).filter(a => 
+            (a.email_solicitante || "").toLowerCase().trim() === _u || 
+            (a["receptor de e-mail"] || "").toLowerCase().trim() === _u
+        );
+        
+        _merged.sort((a,b) => new Date(b.criado_em || b.created_at || 0) - new Date(a.criado_em || a.created_at || 0));
+        
+        if (_merged.length === 0) {
+            container.innerHTML = '<div class="py-10 text-slate-500 text-xs font-black uppercase text-center">Nenhum acordo</div>';
+            return;
+        }
+        
+        container.innerHTML = _merged.map(a => {
+            const isOut = (a.email_solicitante || "").toLowerCase().trim() === _u;
+            let botoesHTML = "";
+            let st = (a.status || "").toUpperCase();
+            
+            if (!isOut && st === "PENDENTE") {
+                botoesHTML = `
+                <div class="flex gap-2 mt-4">
+                    <button onclick="abrirContraproposta('${a.id}')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase shadow-lg"><i class="fas fa-reply mr-1"></i> Oferecer Dia</button>
+                    <button onclick="responderAcordo('${a.id}', 'RECUSADO')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">Recusar</button>
+                </div>`;
+            } else if (isOut && st === "CONTRAPROPOSTA") {
+                botoesHTML = `
+                <div class="bg-indigo-900/30 border border-indigo-500/30 p-3 rounded-lg mt-3">
+                    <div class="text-indigo-400 text-[10px] font-black uppercase mb-1">📋 Resposta do colega</div>
+                    <div class="text-white text-xs font-bold mb-3">Oferece o Dia ${a.dia_resposta || "?"} (${a.resposta_hospital || "?"})</div>
+                    <div class="flex gap-2">
+                        <button onclick="responderAcordo('${a.id}', 'ACEITO')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase shadow-lg">✅ Fechar Acordo</button>
+                        <button onclick="responderAcordo('${a.id}', 'RECUSADO')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">❌ Recusar</button>
+                    </div>
+                </div>`;
+            } else if (!isOut && st === "CONTRAPROPOSTA") {
+                botoesHTML = `<div class="mt-3 text-[10px] text-indigo-400 font-bold uppercase text-center border border-indigo-500/30 bg-indigo-900/20 py-2 rounded-lg"><i class="fas fa-clock mr-1"></i> Aguardando Colega Aceitar</div>`;
+            }
+            
+            let bgStatus = st === 'ACEITO' ? 'text-emerald-400' : (st === 'RECUSADO' ? 'text-red-400' : 'text-slate-400');
+            const emailExibicao = isOut ? a["receptor de e-mail"] : a.email_solicitante;
+
+            return `
+            <div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 mb-3 text-left shadow-lg">
+                <div class="flex justify-between mb-2">
+                    <span class="text-[9px] font-black uppercase ${isOut ? "text-blue-400" : "text-purple-400"}">${isOut ? "📤 Enviada" : "📥 Recebida"}</span>
+                    <span class="text-[9px] font-bold ${bgStatus} uppercase">${st}</span>
+                </div>
+                <div class="text-sm font-bold text-white">Dia ${a.dia_ofertado} - ${a.hospital_ofertado || ""}</div>
+                <div class="text-[10px] text-slate-400 mt-1">${isOut ? "Para: " : "De: "} ${emailExibicao}</div>
+                ${botoesHTML}
+            </div>`;
+        }).join("");
+    } catch (err) {
+        container.innerHTML = `<div class="py-6 text-red-400 text-xs text-center font-bold">ERRO: ${err.message}</div>`;
+    }
+}
