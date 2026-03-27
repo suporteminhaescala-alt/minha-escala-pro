@@ -2759,35 +2759,88 @@ function setupRealtimeAcordos() {
             }
         }
 
-        function confirmUndoSwap() {
+                async function _executarDesfazerTroca() {
             if (!swapUndoTargetKey || !swapUndoTargetItem) return;
-
             const parts = swapUndoTargetItem.split('-');
             const hospitalId = parts[0];
             const type = parts[1];
-            const linkedDay = parts[2];
+            const linkedDay = (parts[2] || '').split('~')[0];
             const originalSuffix = parts[3] ? '-' + parts[3] : '';
-
             shifts[swapUndoTargetKey] = (shifts[swapUndoTargetKey] || []).filter(i => i !== swapUndoTargetItem);
             const linkedKey = getDateKeyForDay(linkedDay);
-
             if (shifts[linkedKey]) {
                 const linkedType = (type === 'SO') ? 'SI' : 'SO';
-                shifts[linkedKey] = shifts[linkedKey].filter(i => !i.startsWith(`${hospitalId}-${linkedType}-`));
+                shifts[linkedKey] = shifts[linkedKey].filter(i => !i.startsWith(hospitalId + '-' + linkedType + '-'));
             }
-
             if (type === 'SO') {
-                shifts[swapUndoTargetKey].push(`${hospitalId}${originalSuffix}`);
+                shifts[swapUndoTargetKey].push(hospitalId + originalSuffix);
             } else if (type === 'SI') {
                 if (shifts[linkedKey]) {
-                    shifts[linkedKey].push(`${hospitalId}${originalSuffix}`);
+                    shifts[linkedKey].push(hospitalId + originalSuffix);
                 }
             }
-
             saveData();
             renderCalendar();
             closeUndoSwapModal();
             showToast("Troca desfeita e plantão restaurado!", "success");
+        }
+        async function confirmUndoSwap() {
+            if (!swapUndoTargetKey || !swapUndoTargetItem) return;
+            const afterRaw = swapUndoTargetItem.includes('-SI-')
+                ? swapUndoTargetItem.split('-SI-')[1]
+                : (swapUndoTargetItem.includes('-SO-') ? swapUndoTargetItem.split('-SO-')[1] : '');
+            const temColega = afterRaw && afterRaw.includes('~')
+                && afterRaw.split('~')[1]
+                && afterRaw.split('~')[1].toUpperCase() !== 'VOCE';
+            if (!temColega) {
+                await _executarDesfazerTroca();
+                return;
+            }
+            const confirmado = confirm('Deseja solicitar o CANCELAMENTO desta troca?\n\nSeu colega precisará confirmar antes de desfazer.');
+            if (!confirmado) return;
+            closeUndoSwapModal();
+            showToast('⏳ Enviando solicitação de cancelamento...', 'info');
+            const parts = swapUndoTargetItem.split('-');
+            const hospitalId = parts[0];
+            const nomePartial = afterRaw.split('~')[1].toUpperCase();
+            const diaRef = afterRaw.split('~')[0];
+            const { data: acordos } = await _supabase.from('gp_acordos')
+                .select('*').eq('status', 'ACEITO')
+                .or('email_solicitante.eq.' + currentUser + ',email_receptor.eq.' + currentUser);
+            let emailColega = null;
+            if (acordos) {
+                const match = acordos.find(a => {
+                    const other = a.email_solicitante === currentUser ? a.email_receptor : a.email_solicitante;
+                    return other.split('@')[0].substring(0,6).toUpperCase() === nomePartial;
+                });
+                if (match) emailColega = match.email_solicitante === currentUser ? match.email_receptor : match.email_solicitante;
+            }
+            if (!emailColega) {
+                showToast('Colega não localizado. Cancelando localmente...', 'error');
+                await _executarDesfazerTroca();
+                return;
+            }
+            const codigo = 'CANCEL-' + Date.now().toString().slice(-6);
+            await _supabase.from('gp_acordos').insert({
+                codigo: codigo,
+                email_solicitante: currentUser,
+                dia_ofertado: diaRef,
+                hospital_ofertado: config[hospitalId] ? config[hospitalId].name : '',
+                email_receptor: emailColega,
+                status: 'CANCELAMENTO_PENDENTE'
+            });
+            try {
+                await _supabase.functions.invoke('send-push', {
+                    body: {
+                        userId: emailColega,
+                        heading: 'Minha Escala PRO: Cancelamento de Troca ⚠️',
+                        message: currentUser.split('@')[0] + ' quer cancelar a troca do dia ' + diaRef + '. Abra a Central de Acordos.',
+                        priority: 10,
+                        android_channel_id: 'fcm_fallback_notification_channel'
+                    }
+                });
+            } catch(e) { console.warn('Push cancelamento:', e); }
+            showToast('✅ Solicitação enviada! Aguarde o colega confirmar.', 'success');
         }
 
         function toggleExtra(dateKey, id) {
@@ -5149,6 +5202,108 @@ function setupRealtimeAcordos() {
             });
         }
 
+                async function confirmarCancelamentoTroca(id) {
+            const { data: acordo } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
+            if (!acordo) { showToast('Acordo não encontrado.', 'error'); return; }
+            await _supabase.from('gp_acordos').update({ status: 'CANCELADO' }).eq('id', id);
+            
+            const ano = currentDate.getFullYear();
+            const mes = currentDate.getMonth();
+            const monthKey = 'shifts_' + ano + '_' + mes;
+            const diaRef = String(acordo.dia_ofertado).padStart(2,'0');
+            const dateKey = ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaRef;
+            
+            const emailSol = acordo.email_solicitante;
+            const emailRec = acordo.email_receptor;
+            const hospNome = String(acordo.hospital_ofertado).toLowerCase();
+
+            const getHospId = async (email) => {
+                const { data } = await _supabase.from('gp_backup').select('data').eq('owner_id', email).eq('month_key','CONFIG').maybeSingle();
+                if (!data||!data.data) return null;
+                for (const k in data.data) { if (data.data[k]&&data.data[k].name&&data.data[k].name.toLowerCase().includes(hospNome)) return k; }
+                return null;
+            };
+
+            const hospIdSol = await getHospId(emailSol);
+            const hospIdRec = await getHospId(emailRec) || hospIdSol;
+
+            const restaurar = async (email, hospId) => {
+                if (!hospId) return;
+                const { data: bk } = await _supabase.from('gp_backup').select('data').eq('owner_id', email).eq('month_key', monthKey).maybeSingle();
+                const sh = (bk && bk.data) ? Object.assign({}, bk.data) : {};
+
+                let targetKey = dateKey;
+                let targetItem = (sh[targetKey] || []).find(i => String(i).startsWith(hospId+'-SI-') || String(i).startsWith(hospId+'-SO-'));
+
+                if (!targetItem) {
+                    for (const k in sh) {
+                        const found = sh[k].find(i => String(i).startsWith(hospId+'-SI-') || String(i).startsWith(hospId+'-SO-'));
+                        if (found) {
+                            const lDay = (found.split('-')[2] || '').split('~')[0];
+                            if (parseInt(lDay) === parseInt(diaRef)) {
+                                targetKey = k;
+                                targetItem = found;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (targetItem) {
+                    const parts = targetItem.split('-');
+                    const type = parts[1];
+                    const linkedDay = (parts[2] || '').split('~')[0];
+                    const originalSuffix = parts[3] ? '-' + parts[3] : '';
+
+                    sh[targetKey] = sh[targetKey].filter(i => i !== targetItem);
+                    if (sh[targetKey].length === 0) delete sh[targetKey];
+
+                    let lDateKey = null;
+                    if (linkedDay) {
+                        lDateKey = ano + '-' + String(mes+1).padStart(2,'0') + '-' + String(linkedDay).padStart(2,'0');
+                        if (sh[lDateKey]) {
+                            const linkedType = (type === 'SO') ? 'SI' : 'SO';
+                            sh[lDateKey] = sh[lDateKey].filter(i => !String(i).startsWith(hospId + '-' + linkedType + '-'));
+                            if (sh[lDateKey].length === 0) delete sh[lDateKey];
+                        }
+                    }
+
+                    if (type === 'SO') {
+                        if (!sh[targetKey]) sh[targetKey] = [];
+                        const val = hospId + originalSuffix;
+                        if (!sh[targetKey].includes(val)) sh[targetKey].push(val);
+                    } else if (type === 'SI') {
+                        if (lDateKey) {
+                            if (!sh[lDateKey]) sh[lDateKey] = [];
+                            const val = hospId + originalSuffix;
+                            if (!sh[lDateKey].includes(val)) sh[lDateKey].push(val);
+                        }
+                    }
+                }
+
+                await _supabase.from('gp_backup').upsert({ owner_id: email, month_key: monthKey, data: sh, updated_at: new Date().toISOString() }, { onConflict: 'owner_id, month_key' });
+                if (currentUser === email) { shifts = sh; saveData(); }
+            };
+
+            if (hospIdSol) await restaurar(emailSol, hospIdSol);
+            if (hospIdRec) await restaurar(emailRec, hospIdRec);
+
+            try {
+                await _supabase.functions.invoke('send-push', {
+                    body: { userId: emailSol, heading: 'Minha Escala PRO: Troca Cancelada ✅',
+                        message: 'Cancelamento do dia ' + acordo.dia_ofertado + ' confirmado. Calendários restaurados.', priority: 10 }
+                });
+            } catch(e) {}
+            
+            showToast('✅ Troca cancelada! Calendários restaurados.', 'success');
+            if (typeof Swal !== 'undefined') Swal.close();
+            await syncWithCloud(true); renderCalendar();
+        }
+        async function recusarCancelamentoTroca(id) {
+            await _supabase.from('gp_acordos').update({ status: 'ACEITO' }).eq('id', id);
+            showToast('Cancelamento recusado. Troca mantida.', 'error');
+            carregarAcordos(currentUser);
+        }
         async function carregarAcordos(userParam) {
             const _u = userParam || currentUser;
             if (!_u) { console.warn('carregarAcordos: usuario nulo'); return; }
@@ -5185,7 +5340,16 @@ function setupRealtimeAcordos() {
                     : a.status;
                 let botoesHTML = '';
                 
-                if (!isOut && a.status === 'PENDENTE') {
+                                if (!isOut && a.status === 'CANCELAMENTO_PENDENTE') {
+                    botoesHTML = '<div class="bg-red-900/30 border border-red-500/30 p-3 rounded-lg mt-3">' +
+                        '<div class="text-red-400 text-[10px] font-black uppercase mb-2">⚠️ ' + a.email_solicitante.split("@")[0] + ' quer cancelar esta troca</div>' +
+                        '<div class="text-white text-xs font-bold mb-3">Dia ' + (a.dia_ofertado||"?") + ' — ' + (a.hospital_ofertado||"?") + '</div>' +
+                        '<div class="flex gap-2">' +
+                            '<button onclick="confirmarCancelamentoTroca(\'' + a.id + '\')" class="flex-1 py-2 bg-red-600 rounded-lg text-[10px] text-white font-black uppercase">✅ Confirmar</button>' +
+                            '<button onclick="recusarCancelamentoTroca(\'' + a.id + '\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">❌ Recusar</button>' +
+                        '</div>' +
+                    '</div>';
+                } else if (!isOut && a.status === 'PENDENTE') {
                     botoesHTML = '<div class="flex gap-2 mt-4">' +
                         '<button onclick="aceitarAcordo(\'' + a.id + '\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">ACEITAR E INFORMAR MEU DIA</button>' +
                         '<button onclick="abrirContraproposta(\'' + a.id + '\')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase">ENVIAR CONTRAPROPOSTA</button>' +
