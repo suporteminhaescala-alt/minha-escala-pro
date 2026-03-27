@@ -319,34 +319,25 @@
                     </div>
                 </form>
 
-                <form id="registerForm" class="space-y-5 hidden" onsubmit="handleRegister(event)">
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide ml-1">Celular ou
-                            E-mail</label>
-                        <input type="text" id="reg-email"
-                            class="w-full bg-[#1E293B] border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600 font-medium"
-                            placeholder="Ex: 98988887777" required>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide ml-1">Crie uma
-                            Senha</label>
-                        <input type="password" id="reg-password"
-                            class="w-full bg-[#1E293B] border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600 text-lg tracking-widest"
-                            placeholder="••••" required>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-all duration-300 transform active:scale-95 shadow-lg shadow-blue-900/20 mt-2 uppercase text-sm tracking-wide border border-blue-500 flex items-center justify-center gap-2">
-                        <span>CRIAR CONTA GRÁTIS</span>
-                    </button>
-                    <div class="text-center mt-4">
-                        <button type="button" onclick="toggleAuthMode('login')"
-                            class="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest underline">Já
-                            tenho conta. Fazer Login</button>
-                    </div>
-                </form>
+                <div id="registerForm" class="hidden flex flex-col items-center py-10 text-center animate-fade-in">
+    <div class="mb-6">
+        <h3 class="text-white font-bold text-lg uppercase tracking-widest">Novo Cadastro</h3>
+        <p class="text-slate-400 text-[10px] uppercase tracking-tighter">Exclusivo via Aplicativo Oficial</p>
+    </div>
+    
+    <a href="https://play.google.com/store/apps/details?id=com.minhaescala.pro" target="_blank" class="block active:scale-95 transition-transform">
+        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/pt-br_badge_web_generic.png" 
+             alt="Disponível no Google Play" 
+             style="width: 220px; height: auto;">
+    </a>
+
+    <button type="button" onclick="toggleAuthMode('login')" class="mt-10 text-[10px] text-slate-500 hover:text-white uppercase tracking-widest font-bold border-b border-transparent hover:border-white transition-all">
+        Voltar para o Login
+    </button>
+</div>
 
                 <div class="mt-8 pt-6 border-t border-slate-700/50 flex flex-col items-center">
-                    <a href="/cdn-cgi/l/email-protection#bccfc9ccd3cec8d9d1d5d2d4ddd9cfdfddd0ddfcdbd1ddd5d092dfd3d1" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
+                    <a href="mailto:suporteminhaescala@gmail.com" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
                         <i class="fa-solid fa-envelope text-xl"></i>
                         <span class="text-[11px] font-black uppercase tracking-widest">Central de Ajuda</span>
                     </a>
@@ -395,7 +386,7 @@
                     <i class="fa-solid fa-laptop text-blue-400 text-xl"></i>
                     <h3 class="text-xs font-bold text-white uppercase tracking-widest">Sincronizar com Computador</h3>
                 </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed mb-4">Você tem direito a acessar sua escala em até 2 dispositivos diferentes. Copie o link abaixo e abra no navegador do PC.</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed mb-4">Você pode usar sua conta no celular e logar em até 2 telas extras (Computador ou Tablet) simultaneamente. Copie o link abaixo e abra no navegador.</p>
                 <button onclick="copyWebLink()"
                     class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-900/20 uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
                     <i class="fas fa-copy"></i> COPIAR MEU LINK DE ACESSO
@@ -1474,7 +1465,7 @@
 
                 if (item.includes('-SO-')) {
                     frases.push(`Você não trabalha no local ${spokenName}. Este plantão foi transferido para o dia ${refDay}.`);
-                } else if (item.includes('-SI-')) {
+                } if (item.includes('-SI-')) {
                     frases.push(`Plantão no local ${spokenName}, para pagar a folga que você tirou no dia ${refDay}.`);
                 } else {
                     // LÓGICA NATURAL: Remove o termo "Normal" conforme ordem do Diretor
@@ -2347,8 +2338,8 @@ function setupRealtimeAcordos() {
                     let myNoteExtra = list.find(x => x.startsWith(`${id}-DB-OBS:`));
                     if (myNoteExtra) allNotes.push({ day, id, text: '⭐EXTRA: ' + myNoteExtra.split('OBS:')[1] });
 
-                    let isDobra = item.includes('-DB') && !item.includes('-SI-') && !item.includes('-SO-');
-                    let isExtra = item.includes('-E') && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isDobra = item.includes('-DB');
+                    let isExtra = item.includes('-E');
                     let isSwapIn = item.includes('-SI-');
                     let isSwapOut = item.includes('-SO-');
                     let isVacation = item.split('-')[1] === 'V';
@@ -2507,10 +2498,10 @@ function setupRealtimeAcordos() {
                         stats[id].work++;
                     } else if (item.includes('-E')) {
                         stats[id].ext++;
-                    } else if (item.includes('-SI-')) {
+                    } if (item.includes('-SI-')) {
                         stats[id].work++;
                         stats[id].swapIn++;
-                    } else if (item.includes('-SO-')) {
+                    } if (item.includes('-SO-')) {
                         stats[id].swapOut++;
                     } else if (!item.includes('-V')) {
                         stats[id].work++;
@@ -2519,7 +2510,7 @@ function setupRealtimeAcordos() {
                     // Lógica de Tabela (Filtros Visuais do PDF)
                     if (hospitalFilter !== 'all' && id !== hospitalFilter) return;
 
-                    let isExtra = (item.includes('-E') || item.includes('-DB')) && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isExtra = (item.includes('-E') || item.includes('-DB'));
                     let isSwap = item.includes('-SI-') || item.includes('-SO-');
                     let isNormal = !isExtra && !isSwap && !item.includes('-V');
                     let noteItem = list.find(x => x.startsWith(`${id}-OBS:`));
@@ -3856,7 +3847,7 @@ function setupRealtimeAcordos() {
 
                     let isSwapIn  = item.includes('-SI-');
                     let isSwapOut = item.includes('-SO-');
-                    let isExtra   = (item.includes('-E') || item.includes('-DB')) && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isExtra = (item.includes('-E') || item.includes('-DB'));
                     let isVac     = item.includes('-V');
 
                     let badge = "";
@@ -3993,9 +3984,7 @@ function setupRealtimeAcordos() {
                 doc.setFontSize(10); doc.setFont(undefined, 'normal');
 
                 if (isPersonal) {
-                    let isTrabalho = item.includes('-SI-');
-                    let after = item.split(isTrabalho ? '-SI-' : '-SO-')[1] || '';
-                    let diaRef = after.split('-')[0];
+                    let isTrabalho = item.includes('-SI-'); let clean = item.replace(/-DB/g, '').replace(/-E/g, ''); let after = clean.split(isTrabalho ? '-SI-' : '-SO-')[1] || ''; let diaRef = after.split('-')[0].split('~')[0];
                     let dataRefStr = diaRef + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
                     let dataFolga = isTrabalho ? dataRefStr : dataFormatada;
                     let dataTrab  = isTrabalho ? dataFormatada : dataRefStr;
@@ -4005,10 +3994,7 @@ function setupRealtimeAcordos() {
                     doc.text("- Compensacao no dia: " + dataTrab, 18, finalY+48);
                     doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+56);
                 } else {
-                    let isSO = item.includes('-SO-');
-                    let after = item.split(isSO ? '-SO-' : '-SI-')[1] || '';
-                    let diaRef = after.split('-')[0];
-                    let colega = (after.split('-')[1] || 'COLEGA').toUpperCase();
+                    let isSO = item.includes('-SO-'); let clean = item.replace(/-DB/g, '').replace(/-E/g, ''); let after = clean.split(isSO ? '-SO-' : '-SI-')[1] || ''; let diaRef = after.split('-')[0].split('~')[0]; let colega = (after.split('~')[1] || after.split('-')[1] || 'COLEGA').toUpperCase();
                     let titular = isSO ? profName : colega;
                     let substituto = isSO ? colega : profName;
                     doc.text("Profissional Titular: " + titular, 18, finalY+22);
@@ -4965,7 +4951,7 @@ function setupRealtimeAcordos() {
                 // Expande itens -DB em 2 entradas: normal + extra
                 var expandedList = [];
                 list.forEach(function(item) {
-                    if (item.includes('-DB') && !item.includes('-SI-') && !item.includes('-SO-')) {
+                    if (item.includes('-DB')) {
                         var baseItem = item.replace('-DB', '');
                         expandedList.push(baseItem);
                         expandedList.push(item);

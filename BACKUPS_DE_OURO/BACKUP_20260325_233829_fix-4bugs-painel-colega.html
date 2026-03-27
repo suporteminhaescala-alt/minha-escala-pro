@@ -4343,14 +4343,6 @@ function setupRealtimeAcordos() {
             });
             if (error) { showToast('Erro ao enviar proposta!', 'error'); console.error(error); return; }
             showToast('Proposta enviada para ' + nomeColega + '!', 'success');
-            try {
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: emailColega,
-                    heading: 'Minha Escala PRO: Nova Proposta 🤝',
-                    message: (appSettings.fullName || currentUser) + ' quer trocar o plantão do dia ' + dia + ' (' + hospital + ') com você. Abra o app para responder.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 1 falhou:', e); }
             closeRemoteSwap();
         }
 
@@ -5023,10 +5015,9 @@ function setupRealtimeAcordos() {
                     } else if (isEx) {
                         badge = '<span class="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">EXTRA</span>';
                     } else if (isSI) {
-                        var _siRaw = item.split('-SI-')[1] || '';
-                        var _siDia = _siRaw.split('~')[0].split('-')[0];
-                        var diaRefSI = _siDia || '?';
-                        var colSI = _siRaw.includes('~') ? _siRaw.split('~')[1].toUpperCase() : (_siRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        var siParts = item.split('-SI-')[1] ? item.split('-SI-')[1].split('-') : [];
+                        var diaRefSI = siParts[0] || '?';
+                        var colSI = (siParts[1] || 'VOCE').toUpperCase();
                         if (colSI === 'VOCE') {
                             badge = '<span class="bg-slate-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">INVERSAO</span>';
                             info  = '<p class="text-[9px] text-slate-300 font-bold mt-1">\u{1F503} Referente ao dia ' + diaRefSI + '</p>';
@@ -5035,10 +5026,9 @@ function setupRealtimeAcordos() {
                             info  = '<p class="text-[9px] text-purple-300 font-bold mt-1">\u{1F91D} Recebido de: ' + colSI + ' - ref. dia ' + diaRefSI + '</p>';
                         }
                     } else if (isSO) {
-                        var _soRaw = item.split('-SO-')[1] || '';
-                        var _soDia = _soRaw.split('~')[0].split('-')[0];
-                        var diaRefSO = _soDia || '?';
-                        var colSO = _soRaw.includes('~') ? _soRaw.split('~')[1].toUpperCase() : (_soRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        var soParts = item.split('-SO-')[1] ? item.split('-SO-')[1].split('-') : [];
+                        var diaRefSO = soParts[0] || '?';
+                        var colSO = (soParts[1] || 'VOCE').toUpperCase();
                         if (colSO === 'VOCE') {
                             badge = '<span class="bg-slate-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">INVERSAO</span>';
                             info  = '<p class="text-[9px] text-slate-300 font-bold mt-1">\u{1F503} Para pagar no dia ' + diaRefSO + '</p>';
@@ -5072,7 +5062,7 @@ function setupRealtimeAcordos() {
             var hasSwap2 = swapsList.length > 0;
             var isPersonal = hasSwap2 && swapsList.every(function(i){
                 var after = i.includes('-SI-') ? i.split('-SI-')[1] : i.split('-SO-')[1];
-                var col = after && after.includes('~') ? after.split('~')[1] : (after ? after.split('-')[1] : 'VOCE') || 'VOCE';
+                var col = (after ? after.split('-')[1] : 'VOCE') || 'VOCE';
                 return col.toUpperCase() === 'VOCE';
             });
             var btnSwap = document.getElementById('btnComprovanteSwap');
@@ -5239,17 +5229,6 @@ function setupRealtimeAcordos() {
                 resposta_hospital: formValues.hosp
             }).eq('id', id);
             await responderAcordo(id, 'AGUARDANDO_CONFIRMACAO');
-            try {
-                const { data: _ac } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
-                if (_ac) {
-                    await _supabase.functions.invoke('send-push', { body: {
-                        userId: _ac.email_solicitante,
-                        heading: 'Minha Escala PRO: Proposta Aceita! ✅',
-                        message: 'Seu colega aceitou! Ele oferece o dia ' + (_ac.dia_resposta || '?') + ' (' + (_ac.resposta_hospital || '?') + '). Confirme para selar o acordo.',
-                        url: 'https://minha-escala-pro.vercel.app/#app'
-                    }});
-                }
-            } catch(e) { console.warn('Push 2 falhou:', e); }
         }
         async function responderAcordo(id, status) {
             await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
@@ -5285,15 +5264,15 @@ function setupRealtimeAcordos() {
                         const { data: bkSol } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailSol).eq('month_key', monthKey).maybeSingle();
                         const shiftsSol = (bkSol && bkSol.data) ? Object.assign({}, bkSol.data) : {};
                         if (!shiftsSol[dateKey]) shiftsSol[dateKey] = [];
-                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
+                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => !String(i).startsWith(hospIdSol + '-'));
                         const diaRespStr = String(acordo.dia_resposta || diaRef).padStart(2,'0');
                         const dateKeyResp = ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaRespStr;
                         const nomeRec = emailRec.split('@')[0].substring(0,6).toUpperCase();
                         const nomeSol = emailSol.split('@')[0].substring(0,6).toUpperCase();
-                        shiftsSol[dateKey] = (shiftsSol[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
+                        shiftsSol[dateKey] = (shiftsSol[dateKey] || []).filter(i => !String(i).startsWith(hospIdSol + '-'));
                         shiftsSol[dateKey].push(hospIdSol + '-SO-' + parseInt(diaRespStr) + '~' + nomeRec);
                         if (!shiftsSol[dateKeyResp]) shiftsSol[dateKeyResp] = [];
-                        shiftsSol[dateKeyResp] = shiftsSol[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
+                        shiftsSol[dateKeyResp] = shiftsSol[dateKeyResp].filter(i => !String(i).startsWith(hospIdSol + '-'));
                         shiftsSol[dateKeyResp].push(hospIdSol + '-SI-' + parseInt(diaRef) + '~' + nomeRec);
                         await _supabase.from('gp_backup').upsert({ owner_id: emailSol, month_key: monthKey, data: shiftsSol, updated_at: new Date().toISOString() }, { onConflict: 'owner_id, month_key' });
 
@@ -5301,11 +5280,11 @@ function setupRealtimeAcordos() {
                         const { data: bkRec } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailRec).eq('month_key', monthKey).maybeSingle();
                         const shiftsRec = (bkRec && bkRec.data) ? Object.assign({}, bkRec.data) : {};
                         if (!shiftsRec[dateKey]) shiftsRec[dateKey] = [];
-                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
-                        shiftsRec[dateKey] = (shiftsRec[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
+                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => !String(i).startsWith(hospIdRec + '-'));
+                        shiftsRec[dateKey] = (shiftsRec[dateKey] || []).filter(i => !String(i).startsWith(hospIdRec + '-'));
                         shiftsRec[dateKey].push(hospIdRec + '-SI-' + parseInt(diaRespStr) + '~' + nomeSol);
                         if (!shiftsRec[dateKeyResp]) shiftsRec[dateKeyResp] = [];
-                        shiftsRec[dateKeyResp] = shiftsRec[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
+                        shiftsRec[dateKeyResp] = shiftsRec[dateKeyResp].filter(i => !String(i).startsWith(hospIdRec + '-'));
                         shiftsRec[dateKeyResp].push(hospIdRec + '-SO-' + parseInt(diaRef) + '~' + nomeSol);
                         await _supabase.from('gp_backup').upsert({ owner_id: emailRec, month_key: monthKey, data: shiftsRec, updated_at: new Date().toISOString() }, { onConflict: 'owner_id, month_key' });
 
@@ -5315,22 +5294,6 @@ function setupRealtimeAcordos() {
                     }
 
                     showToast('✅ ACORDO FECHADO! Escalas atualizadas.', 'success');
-            try {
-                const _nomeA = acordo.email_solicitante.split('@')[0];
-                const _nomeB = acordo.email_receptor.split('@')[0];
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_receptor,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + acordo.dia_ofertado + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_solicitante,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + (acordo.dia_resposta || '?') + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 3 falhou:', e); }
                     if (typeof Swal !== 'undefined') Swal.close();
                     await syncWithCloud(true);
                     renderCalendar();

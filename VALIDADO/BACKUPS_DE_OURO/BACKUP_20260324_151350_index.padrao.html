@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -158,7 +158,7 @@
             padding: 0px 2px;
             border-radius: 3px;
             font-size: 6px;
-            margin-top: -4px;
+            margin-top: 0px;
             padding-bottom: 2px;
             border: none;
             animation: none;
@@ -317,40 +317,38 @@
                             class="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest underline">Não
                             tem conta? Crie agora</button>
                     </div>
-                </form>
-
-                <form id="registerForm" class="space-y-5 hidden" onsubmit="handleRegister(event)">
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide ml-1">Celular ou
-                            E-mail</label>
-                        <input type="text" id="reg-email"
-                            class="w-full bg-[#1E293B] border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600 font-medium"
-                            placeholder="Ex: 98988887777" required>
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[11px] font-bold text-slate-400 uppercase tracking-wide ml-1">Crie uma
-                            Senha</label>
-                        <input type="password" id="reg-password"
-                            class="w-full bg-[#1E293B] border border-slate-700 rounded-lg px-4 py-3 text-sm text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder-slate-600 text-lg tracking-widest"
-                            placeholder="••••" required>
-                    </div>
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition-all duration-300 transform active:scale-95 shadow-lg shadow-blue-900/20 mt-2 uppercase text-sm tracking-wide border border-blue-500 flex items-center justify-center gap-2">
-                        <span>CRIAR CONTA GRÁTIS</span>
-                    </button>
-                    <div class="text-center mt-4">
-                        <button type="button" onclick="toggleAuthMode('login')"
-                            class="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest underline">Já
-                            tenho conta. Fazer Login</button>
-                    </div>
-                </form>
-
+                
                 <div class="mt-8 pt-6 border-t border-slate-700/50 flex flex-col items-center">
-                    <a href="/cdn-cgi/l/email-protection#bccfc9ccd3cec8d9d1d5d2d4ddd9cfdfddd0ddfcdbd1ddd5d092dfd3d1" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
-                        <i class="fa-solid fa-envelope text-xl"></i>
-                        <span class="text-[11px] font-black uppercase tracking-widest">Central de Ajuda</span>
-                    </a>
+                    <button type="button" onclick="abrirCentralAjuda()" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
+    <i class="fa-solid fa-headset text-xl text-blue-400"></i>
+    <span class="text-[11px] font-black uppercase tracking-widest">Central de Ajuda</span>
+</button>
                 </div>
+                </form>
+
+                <div id="registerForm" class="hidden flex flex-col items-center py-2 text-center animate-fade-in">
+    <div class="mb-4">
+        <h3 class="text-white font-bold text-lg uppercase tracking-widest">Novo Cadastro</h3>
+        <p class="text-slate-400 text-[10px] uppercase tracking-tighter">Exclusivo via Aplicativo Oficial</p>
+    </div>
+    
+    <a href="https://play.google.com/store/apps/details?id=com.minhaescala.pro" target="_blank" class="block active:scale-95 transition-transform mb-5">
+        <img src="https://play.google.com/intl/en_us/badges/static/images/badges/pt-br_badge_web_generic.png" 
+             alt="Disponível no Google Play" 
+             style="width: 180px; height: auto;" class="mx-auto">
+    </a>
+
+    <div class="bg-[#0B1121] p-2 rounded-xl border border-slate-700 shadow-inner mb-2">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.minhaescala.pro&bgcolor=162032&color=ffffff&margin=2" alt="QR Code Play Store" class="rounded-lg shadow-lg">
+    </div>
+    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-6">Aponte a câmera para baixar</p>
+
+    <button type="button" onclick="toggleAuthMode('login')" class="text-[10px] text-slate-500 hover:text-white uppercase tracking-widest font-bold border-b border-transparent hover:border-white transition-all">
+        Voltar para o Login
+    </button>
+</div>
+
+                
             </div>
         </main>
     </div>
@@ -395,8 +393,7 @@
                     <i class="fa-solid fa-laptop text-blue-400 text-xl"></i>
                     <h3 class="text-xs font-bold text-white uppercase tracking-widest">Sincronizar com Computador</h3>
                 </div>
-                <p class="text-[10px] text-slate-400 leading-relaxed mb-4">Você tem direito a acessar sua escala em até
-                    3 dispositivos diferentes. Copie o link abaixo e abra no navegador do PC.</p>
+                <p class="text-[10px] text-slate-400 leading-relaxed mb-4">Você pode usar sua conta no celular e logar em até 2 telas extras (Computador ou Tablet) simultaneamente. Copie o link abaixo e abra no navegador.</p>
                 <button onclick="copyWebLink()"
                     class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all active:scale-95 shadow-lg shadow-blue-900/20 uppercase text-[10px] tracking-widest flex items-center justify-center gap-2">
                     <i class="fas fa-copy"></i> COPIAR MEU LINK DE ACESSO
@@ -634,15 +631,9 @@
                     <i class="fas fa-plus mr-2"></i>ADICIONAR LOCAL
                 </button>
 
-                <button onclick="copyWebLink(true)"
-                    class="w-full border-2 border-dashed border-blue-500/50 text-blue-400 py-3 rounded-lg text-xs font-bold uppercase hover:bg-blue-900/20 hover:border-blue-400 transition-colors tracking-widest mt-4">
-                    <i class="fas fa-link mr-2"></i> MEU LINK DE ACESSO WEB
-                </button>
+                
 
-                <button onclick="openPrivacyPolicy()"
-                    class="w-full border-2 border-dashed border-slate-600/50 text-slate-300 py-3 rounded-lg text-xs font-bold uppercase hover:bg-slate-800 hover:border-slate-500 transition-colors tracking-widest mt-4">
-                    <i class="fas fa-shield-alt mr-2"></i> Política de Privacidade
-                </button>
+                
 
                 <div id="hoursPanel" class="hidden space-y-4">
                     <div class="flex items-center justify-between">
@@ -803,6 +794,11 @@
                         class="w-full bg-emerald-600 text-white py-3.5 rounded-lg text-xs font-black shadow-lg shadow-emerald-900/30 transform active:scale-95 transition-all uppercase tracking-widest">SALVAR
                         ALTERAÇÕES</button>
                 </div>
+
+                <button onclick="openPrivacyPolicy()"
+                    class="w-full border-2 border-dashed border-slate-600/50 text-slate-300 py-3 rounded-lg text-xs font-bold uppercase hover:bg-slate-800 hover:border-slate-500 transition-colors tracking-widest mt-4">
+                    <i class="fas fa-shield-alt mr-2"></i> Política de Privacidade
+                </button>
 
                 <div class="pt-6 mt-6 border-t border-slate-800/50 text-center">
                     <button onclick="confirmarExclusaoConta()"
@@ -1206,6 +1202,7 @@
         let selectorCallback = null;
         let noteTargetDay = null;
         let noteTargetId = null;
+        let noteTargetIsExtra = false;
         let shiftTargetDay = null;
         let shiftTargetId = null;
         let shiftTargetIsExtra = false;
@@ -1253,38 +1250,18 @@
         }
 
         function copyWebLink(fromSettings = false) {
-            const token = currentUser || localStorage.getItem('app_user_pro') || '';
-            const pcUrl = 'https://minha-escala.netlify.app/pc.html?token=' + encodeURIComponent(token);
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(pcUrl).then(function() {
-                    alert('Link copiado! Cole no navegador do PC.');
-                    showToast('✅ Link copiado! Cole no WhatsApp e abra no PC.', 'success');
-                }).catch(function() {
-                    const t = document.createElement('input');
-                    t.value = pcUrl; document.body.appendChild(t); t.select();
-                    document.execCommand('copy'); document.body.removeChild(t);
-                    alert('Link copiado! Cole no navegador do PC.');
-                    showToast('✅ Link copiado! Cole no WhatsApp e abra no PC.', 'success');
-                });
-            } else {
-                const t = document.createElement('input');
-                t.value = pcUrl; document.body.appendChild(t); t.select();
-                document.execCommand('copy'); document.body.removeChild(t);
-                alert('Link copiado! Cole no navegador do PC.');
-                showToast('✅ Link copiado! Cole no WhatsApp e abra no PC.', 'success');
-            }
-            localStorage.setItem('gp_web_link_copied', 'true');
-            if (!fromSettings) {
-                const card = document.getElementById('web-access-card');
-                if (card) card.classList.add('hidden');
-            }
+            const tempInput = document.createElement('input');
+            tempInput.value = 'https://minha-escala-pro.vercel.app';
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("✅ Link copiado! Cole no WhatsApp e abra no PC.", "success");
+            // Ocultação do card removida por ordem do Diretor. Fixo no Dashboard.
         }
 
         function checkWebAccessCard() {
-            const card = document.getElementById('web-access-card');
-            if (card && localStorage.getItem('gp_web_link_copied') === 'true') {
-                card.classList.add('hidden');
-            }
+            // O card agora é permanente no Dashboard. Nenhuma ação de ocultar.
         }
 
         function openPrivacyPolicy() {
@@ -1495,7 +1472,7 @@
 
                 if (item.includes('-SO-')) {
                     frases.push(`Você não trabalha no local ${spokenName}. Este plantão foi transferido para o dia ${refDay}.`);
-                } else if (item.includes('-SI-')) {
+                } if (item.includes('-SI-')) {
                     frases.push(`Plantão no local ${spokenName}, para pagar a folga que você tirou no dia ${refDay}.`);
                 } else {
                     // LÓGICA NATURAL: Remove o termo "Normal" conforme ordem do Diretor
@@ -2346,9 +2323,9 @@ function setupRealtimeAcordos() {
                         monthStats[id].ext++;
                     } else if (type === 'SI') {
                         monthStats[id].work++;
-                        swapDetails.push({ text: `Dia ${day}: Pagamento do ${hospitalName} referente ao dia ${parts[2]}`, day: day });
+                        swapDetails.push({ text: `Dia ${day}: Pagamento do ${hospitalName} referente ao dia ${parts[2].split('~')[0]}`, day: day });
                     } else if (type === 'SO') {
-                        swapDetails.push({ text: `Dia ${day}: Folgou no ${hospitalName} para pagar no dia ${parts[2]}`, day: day });
+                        swapDetails.push({ text: `Dia ${day}: Folgou no ${hospitalName} para pagar no dia ${parts[2].split('~')[0]}`, day: day });
                     } else if (type !== 'V' && !type.includes('OBS')) {
                         monthStats[id].work++;
                     }
@@ -2365,12 +2342,14 @@ function setupRealtimeAcordos() {
                     let cfg = config[id];
                     let myNote = list.find(x => x.startsWith(`${id}-OBS:`));
                     if (myNote) allNotes.push({ day, id, text: myNote.split('OBS:')[1] });
+                    let myNoteExtra = list.find(x => x.startsWith(`${id}-DB-OBS:`));
+                    if (myNoteExtra) allNotes.push({ day, id, text: '⭐EXTRA: ' + myNoteExtra.split('OBS:')[1] });
 
-                    let isDobra = item.includes('-DB') && !item.includes('-SI-') && !item.includes('-SO-');
-                    let isExtra = item.includes('-E') && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isDobra = item.includes('-DB');
+                    let isExtra = item.includes('-E');
                     let isSwapIn = item.includes('-SI-');
                     let isSwapOut = item.includes('-SO-');
-                    let isVacation = item.includes('-V');
+                    let isVacation = item.split('-')[1] === 'V';
                     let isPersonalSwap = false;
 
                     let dbIndex = parts.indexOf('DB');
@@ -2406,25 +2385,25 @@ function setupRealtimeAcordos() {
                         if (extraShiftLabel) sub += `<span class="bg-black/40 px-[2px] rounded tracking-widest text-[5px] border border-amber-500/50">${extraShiftLabel}</span>`;
                     } else if (isSwapIn) {
                         border = "swap-in-style";
-                        const _siAfter = item.split('-SI-')[1] || '';
-                        const _siColega = (_siAfter.split('~')[1] || _siAfter.split('-')[1] || '').toUpperCase();
-                        sub = (_siColega && _siColega !== 'VOCE') ? '🤝' : 'PGT TROCA';
+                        const _si = (item.split('-SI-')[1] || '');
+                        const _siC = (_si.split('~')[1] || _si.split('-')[1] || '').toUpperCase();
+                        sub = (_siC && _siC !== 'VOCE') ? '🤝' : 'PGT TROCA';
                     } else if (isSwapOut) {
                         border = "swap-out-style";
-                        const _soAfter = item.split('-SO-')[1] || '';
-                        const _soColega = (_soAfter.split('~')[1] || _soAfter.split('-')[1] || '').toUpperCase();
-                        sub = (_soColega && _soColega !== 'VOCE') ? '🤝' : 'FOLGA TROCA';
+                        const _so = (item.split('-SO-')[1] || '');
+                        const _soC = (_so.split('~')[1] || _so.split('-')[1] || '').toUpperCase();
+                        sub = (_soC && _soC !== 'VOCE') ? '🤝' : 'FOLGA TROCA';
                     } else if (isExtra) {
                         border = "extra-border";
                         if (normalShiftLabel) sub = "EXTRA"; else icon = '<i class="fas fa-star text-amber-300 ml-1"></i>';
                     }
 
                     let subBadge = sub ? `<div class='${sub.includes("EXTRA") ? "dobra-badge" : "text-[6px] font-black bg-black/40 px-[2px] py-[0px] rounded mt-[0px] tracking-tight leading-none"}' >${sub}</div>` : '';
-                    let inlineShift = normalShiftLabel ? `<span class="text-[6px] text-yellow-300 bg-black/30 px-[3px] pb-[1px] min-w-[12px] rounded ml-[2px] inline-flex items-center justify-center leading-none border border-yellow-300/30">${normalShiftLabel}</span>` : '';
+                    let inlineShift = normalShiftLabel ? `<span class="text-[5px] text-yellow-300 font-black tracking-tight leading-none">${normalShiftLabel}</span>` : '';
 
                     pillsHTML += `
-                        <div class="w-full h-[22px] min-h-[22px] shrink-0 flex flex-col items-center justify-center rounded text-[9px] leading-none font-black uppercase shadow-sm p-[1px] text-center whitespace-nowrap overflow-hidden ${bg} ${border} mb-[1px] last:mb-0 relative text-white tracking-wide">
-                            <div class="${textClass} flex items-center justify-center flex-nowrap leading-[1] gap-x-1">${icon}<span class="truncate text-xs font-extrabold">${cfg.name}</span>${inlineShift}</div>
+                        <div class="w-full h-[22px] min-h-[22px] shrink-0 flex flex-col items-center justify-center rounded text-[8px] leading-none font-black uppercase shadow-sm p-[1px] text-center whitespace-nowrap overflow-hidden ${bg} ${border} mb-[1px] last:mb-0 relative text-white tracking-tighter">
+                            <div class="${textClass} flex items-center justify-center flex-nowrap leading-[1] gap-x-0.5">${icon}<span class="truncate text-[10px] font-black">${cfg.name}</span>${inlineShift}</div>
                             ${subBadge}
                         </div>`;
                 });
@@ -2444,10 +2423,10 @@ function setupRealtimeAcordos() {
                 }
 
                 cell.innerHTML = `
-                    <div class="absolute top-0 left-0 bg-slate-900/80 backdrop-blur-sm px-1 py-0 rounded-br-md z-20 border-b border-r ${isToday ? 'border-yellow-400/50' : 'border-slate-700'}">
-                        <span class="text-[8px] leading-none font-mono ${isToday ? 'text-yellow-400 font-black' : 'text-slate-300 font-bold'}">${day}</span>
+                    <div class="absolute top-0 left-[3px] z-20">
+                        <span class="block text-[9px] leading-none pt-[2px] font-mono ${isToday ? 'text-yellow-400 font-black' : 'text-slate-300 font-bold'}">${day}</span>
                     </div>
-                    <div class="flex flex-col flex-1 h-full w-full ${validShifts.length >= 3 ? 'overflow-y-auto touch-pan-y pointer-events-auto' : 'overflow-hidden'} hide-scroll pt-3 z-10">${pillsHTML}</div>`;
+                    <div class="flex flex-col flex-1 h-full w-full ${validShifts.length >= 3 ? 'overflow-y-auto touch-pan-y pointer-events-auto' : 'overflow-hidden'} hide-scroll pt-[4px] z-10">${pillsHTML}</div>`;
 
                 cell.onclick = () => handleCellClick(dateKey, day);
                 grid.appendChild(cell);
@@ -2496,7 +2475,7 @@ function setupRealtimeAcordos() {
 
             doc.setFontSize(20);
             doc.setTextColor(16, 185, 129);
-            doc.text("GESTOR PRO - RELATÓRIO DE ESCALA", 14, 22);
+            doc.text("MINHA ESCALA PRO - RELATORIO DE ESCALA", 14, 22);
 
             doc.setFontSize(10);
             doc.setTextColor(100);
@@ -2526,10 +2505,10 @@ function setupRealtimeAcordos() {
                         stats[id].work++;
                     } else if (item.includes('-E')) {
                         stats[id].ext++;
-                    } else if (item.includes('-SI-')) {
+                    } if (item.includes('-SI-')) {
                         stats[id].work++;
                         stats[id].swapIn++;
-                    } else if (item.includes('-SO-')) {
+                    } if (item.includes('-SO-')) {
                         stats[id].swapOut++;
                     } else if (!item.includes('-V')) {
                         stats[id].work++;
@@ -2538,7 +2517,7 @@ function setupRealtimeAcordos() {
                     // Lógica de Tabela (Filtros Visuais do PDF)
                     if (hospitalFilter !== 'all' && id !== hospitalFilter) return;
 
-                    let isExtra = (item.includes('-E') || item.includes('-DB')) && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isExtra = (item.includes('-E') || item.includes('-DB'));
                     let isSwap = item.includes('-SI-') || item.includes('-SO-');
                     let isNormal = !isExtra && !isSwap && !item.includes('-V');
                     let noteItem = list.find(x => x.startsWith(`${id}-OBS:`));
@@ -2547,7 +2526,7 @@ function setupRealtimeAcordos() {
                     let shouldShow = (isNormal && includeNormal) || (isExtra && includeExtra) || (isSwap && includeSwaps) || (hasNote && includeObs);
                     if (!shouldShow) return;
 
-                    let hospitalName = config[id].name;
+                    let hospitalName = config[id].name.replace(/[^\x00-\x7F]/g, '').trim();
                     let shiftType = '---';
                     if (parts[1] === 'SD') shiftType = 'DIURNO';
                     else if (parts[1] === 'SN') shiftType = 'NOTURNO';
@@ -2617,7 +2596,7 @@ function setupRealtimeAcordos() {
                         doc.setFontSize(10);
                         doc.setTextColor(30, 41, 59);
                         doc.setFont(undefined, 'bold');
-                        doc.text(`▶ ${_cn(cfg.name).toUpperCase()}`, 14, finalY);
+                        doc.text(`> ${cfg.name.replace(/[^\x00-\x7F]/g, "").toUpperCase()}`, 14, finalY);
                         finalY += 5;
 
                         doc.setFontSize(9);
@@ -2818,6 +2797,8 @@ function setupRealtimeAcordos() {
                     } else {
                         list[existingIdx] = newParts.join('-');
                     }
+                } else if (item.includes('-SI-') || item.includes('-SO-')) {
+                    list.push(idStr + '-E');
                 } else {
                     list[existingIdx] = item + '-DB';
                 }
@@ -2865,19 +2846,19 @@ function setupRealtimeAcordos() {
                     let hasExtra = (shifts[dateKey] || []).some(item => parseInt(item.split('-')[0]) === id && (item.includes("-E") || item.includes("-DB")));
                     if (hasExtra) {
                         btn.className = `w-full p-3 rounded-lg text-xs font-bold text-white uppercase shadow-lg mb-2 bg-red-700 border-2 border-red-500 tracking-widest`;
-                        btn.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Cancelar Extra ${_cn(config[id].name).split(' ')[0]}`;
+                        btn.innerHTML = `<i class="fas fa-times-circle mr-2"></i> Cancelar Extra ${config[id].name.split(' ')[0]}`;
                     } else {
                         btn.className = `w-full p-3 rounded-lg text-xs font-bold text-white uppercase shadow-lg mb-2 ${config[id].classBg} tracking-widest`;
                         btn.innerText = config[id].name;
                     }
                 } else if (currentMode === 'swap' && isSwap) {
                     btn.className = `w-full p-3 rounded-lg text-xs font-bold text-white uppercase shadow-lg mb-2 bg-red-700 border-2 border-red-500 tracking-widest`;
-                    btn.innerHTML = `<i class="fas fa-undo mr-2"></i> DESFAZER TROCA ${_cn(config[id].name).split(' ')[0]}`;
+                    btn.innerHTML = `<i class="fas fa-undo mr-2"></i> DESFAZER TROCA ${config[id].name.split(' ')[0]}`;
                 } else if (currentMode === 'view') {
                     let hasShift = (shifts[dateKey] || []).some(item => parseInt(item.split('-')[0]) === id);
                     if (hasShift) {
                         btn.className = `w-full p-3 rounded-lg text-xs font-bold text-white uppercase shadow-lg mb-2 bg-red-700 border-2 border-red-500 tracking-widest`;
-                        btn.innerHTML = `✖ REMOVER ${_cn(config[id].name).split(' ')[0]}`;
+                        btn.innerHTML = `✖ REMOVER ${config[id].name.split(' ')[0]}`;
                     } else {
                         btn.className = `w-full p-3 rounded-lg text-xs font-bold text-white uppercase shadow-lg mb-2 ${config[id].classBg} tracking-widest`;
                         btn.innerText = config[id].name;
@@ -3041,11 +3022,11 @@ function setupRealtimeAcordos() {
                     let suffix = String(swapSourceId).replace(baseId, '').replace('-E', '').replace('-DB', '');
 
                     srcList = srcList.filter(i => parseInt(i.split('-')[0]) !== parseInt(baseId));
-                    srcList.push(`${baseId}-SO-${day}${suffix}`);
+                    srcList.push(`${baseId}-SO-${day}~VOCE${suffix}`);
                     shifts[srcKey] = srcList;
 
                     let targetList = (shifts[dateKey] || []);
-                    targetList.push(`${baseId}-SI-${swapSourceDay}${suffix}`);
+                    targetList.push(`${baseId}-SI-${swapSourceDay}~VOCE${suffix}`);
                     shifts[dateKey] = targetList;
 
                     swapState = 'idle';
@@ -3084,11 +3065,30 @@ function setupRealtimeAcordos() {
                 let valid = list.filter(i => !i.includes('OBS:'));
                 if (valid.length === 0) return showToast("Adicione plantão.");
 
-                if (valid.length === 1) {
-                    openNoteInput(dateKey, parseInt(String(valid[0]).split('-')[0]));
+                // Monta opções separando normal e extra do mesmo hospital
+                let noteOptions = [];
+                valid.forEach(item => {
+                    let id = parseInt(String(item).split('-')[0]);
+                    if (!config[id]) return;
+                    let isExtra = item.includes('-E') || item.includes('-DB');
+                    let label = config[id].name + (isExtra ? ' (EXTRA)' : ' (NORMAL)');
+                    noteOptions.push({ id, label, fullItem: item, isExtra });
+                });
+
+                // Se só tem 1 item mas é dobra (-DB), expande para 2 opções
+                if (noteOptions.length === 1 && noteOptions[0].fullItem.includes('-DB')) {
+                    let dobraId = noteOptions[0].id;
+                    let dobraOptions = [
+                        { id: dobraId, label: config[dobraId].name + ' (NORMAL)', fullItem: noteOptions[0].fullItem, isExtra: false },
+                        { id: dobraId, label: config[dobraId].name + ' (EXTRA)', fullItem: noteOptions[0].fullItem, isExtra: true }
+                    ];
+                    selectorCallback = (opt) => openNoteInput(dateKey, opt.id, opt.isExtra);
+                    openCustomShiftSelector(dobraOptions, day, "Fazer nota?", dateKey);
+                } else if (noteOptions.length === 1) {
+                    openNoteInput(dateKey, noteOptions[0].id, noteOptions[0].isExtra);
                 } else {
-                    selectorCallback = (fullId) => openNoteInput(dateKey, parseInt(String(fullId).split('-')[0]));
-                    openShiftSelector(valid, day, "Fazer nota?", dateKey);
+                    selectorCallback = (opt) => openNoteInput(dateKey, opt.id, opt.isExtra);
+                    openCustomShiftSelector(noteOptions, day, "Fazer nota?", dateKey);
                 }
             } else if (currentMode === 'test') {
                 falarPlantaoDoDiaEspecifico(dateKey, day);
@@ -3139,11 +3139,13 @@ function setupRealtimeAcordos() {
             document.getElementById('shiftTypeModal').classList.add('hidden');
         }
 
-        function openNoteInput(k, i) {
+        function openNoteInput(k, i, isExtra) {
             noteTargetDay = k;
             noteTargetId = i;
+            noteTargetIsExtra = !!isExtra;
+            let obsKey = isExtra ? `${i}-DB-OBS:` : `${i}-OBS:`;
             let list = shifts[k] || [];
-            let noteItem = list.find(x => x.startsWith(`${i}-OBS:`));
+            let noteItem = list.find(x => x.startsWith(obsKey));
             document.getElementById('noteTextarea').value = noteItem ? noteItem.split('OBS:')[1] : "";
             document.getElementById('noteInputModal').classList.remove('hidden');
         }
@@ -3155,8 +3157,9 @@ function setupRealtimeAcordos() {
         function saveNoteFromModal() {
             let txt = document.getElementById('noteTextarea').value.trim();
             let list = shifts[noteTargetDay] || [];
-            list = list.filter(x => !x.startsWith(`${noteTargetId}-OBS:`));
-            if (txt) { list.push(`${noteTargetId}-OBS:${txt}`); }
+            let obsKey = noteTargetIsExtra ? `${noteTargetId}-DB-OBS:` : `${noteTargetId}-OBS:`;
+            list = list.filter(x => !x.startsWith(obsKey));
+            if (txt) { list.push(`${obsKey}${txt}`); }
             shifts[noteTargetDay] = list;
             saveData();
             renderCalendar();
@@ -3421,14 +3424,12 @@ function setupRealtimeAcordos() {
             document.getElementById('btnAdicionarLocal').classList.remove('hidden');
         }
 
-        function _cn(n){ return (n||"").replace(/[\r\n]|&#xD;/g,"").trim(); }
-
         function proceedToTargetSelection(day, id) {
             swapSourceDay = day;
             swapSourceId = id;
             swapState = 'selecting_target';
             let realId = parseInt(String(id).split('-')[0]);
-            showFeedbackBar('DESTINO', `Mover ${_cn(config[realId].name)} do dia ${day}.`, true);
+            showFeedbackBar('DESTINO', `Mover ${config[realId].name} do dia ${day}.`, true);
             renderCalendar();
         }
 
@@ -3572,13 +3573,24 @@ function setupRealtimeAcordos() {
             }, 3000);
         }
 
-        function handleLogout() {
-            localStorage.removeItem('app_user_pro');
-            currentUser = null;
-            document.getElementById('username-input').value = '';
-            document.getElementById('password-input').value = '';
-            showScreen('login');
-            showToast("Sessão encerrada com sucesso.", "success");
+        async function handleLogout() {
+            try {
+                if (_supabase && currentUser && deviceID) {
+                    await _supabase.from('gp_device_links')
+                        .delete()
+                        .eq('user_email', currentUser)
+                        .eq('device_id', deviceID);
+                }
+            } catch(e) {
+                console.warn('Aviso: vaga nao liberada no servidor.', e);
+            } finally {
+                localStorage.removeItem('app_user_pro');
+                currentUser = null;
+                document.getElementById('username-input').value = '';
+                document.getElementById('password-input').value = '';
+                showScreen('login');
+                showToast("Sessão encerrada com sucesso.", "success");
+            }
         }
 
         function toggleExtraMode() { resetOtherModes('extra'); }
@@ -3855,7 +3867,7 @@ function setupRealtimeAcordos() {
 
                     let isSwapIn  = item.includes('-SI-');
                     let isSwapOut = item.includes('-SO-');
-                    let isExtra   = (item.includes('-E') || item.includes('-DB')) && !item.includes('-SI-') && !item.includes('-SO-');
+                    let isExtra = (item.includes('-E') || item.includes('-DB'));
                     let isVac     = item.includes('-V');
 
                     let badge = "";
@@ -3933,123 +3945,145 @@ function setupRealtimeAcordos() {
         }
 
         async function gerarComprovanteTroca() {
-            showToast("Gerando Documento...", "info");
-            await new Promise(resolve => setTimeout(resolve, 50));
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+    showToast("Gerando Documento...", "info");
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-            let k = window._currentReportDate || window._ddKey;
-            let d = window._currentReportDay  || window._ddDay;
-            let list = shifts[k] || [];
-            let swaps = list.filter(i => i.includes('-SI-') || i.includes('-SO-'));
-            let dataFormatada = d + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
-            const profName = (appSettings.fullName || currentUser || "PROFISSIONAL").toUpperCase();
+    let k = window._currentReportDate || window._ddKey;
+    let d = window._currentReportDay  || window._ddDay;
+    let list = shifts[k] || [];
+    let swaps = list.filter(i => i.includes('-SI-') || i.includes('-SO-'));
+    let dataFormatada = d + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
+    const profName = (appSettings.fullName || currentUser || "PROFISSIONAL").toUpperCase();
 
-            let isPersonal = swaps.length > 0 && swaps.every(function(item) {
-                var after = item.includes('-SI-') ? item.split('-SI-')[1] : item.split('-SO-')[1];
-                var col = (after ? after.split('-')[1] : 'VOCE') || 'VOCE';
-                return col.toUpperCase() === 'VOCE';
-            });
-
-            doc.setFontSize(16);
-            doc.setTextColor(0, 0, 0);
-            doc.setFont(undefined, 'bold');
-            doc.text(isPersonal ? "TERMO DE INVERSAO DE PLANTAO" : "TERMO DE ACORDO DE TROCA", 105, 22, { align: "center" });
-
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            doc.text("DATA DO REGISTRO: " + new Date().toLocaleDateString('pt-BR'), 14, 32);
-            doc.text("CODIGO: ME-PRO-" + Date.now().toString().slice(-6), 14, 38);
-            doc.setDrawColor(0, 0, 0);
-            doc.setLineWidth(0.5);
-            doc.line(14, 42, 196, 42);
-
-            let finalY = 50;
-
-            swaps.forEach(function(item) {
-                let id = parseInt(item.split('-')[0]);
-                if (!config[id]) return;
-                let localNome = config[id].name.toUpperCase();
-                let st = config[id].startTime || '07:00';
-                let et = config[id].endTime   || '19:00';
-                const shiftMap = { 'SD':'DIURNO (SD)', 'SN':'NOTURNO (SN)', 'M':'MANHA (M)', 'T':'TARDE (T)', 'N':'NOITE (N)' };
-                let turnoLabel = '';
-                Object.keys(shiftMap).forEach(function(key) {
-                    var re = new RegExp('(^|-)' + key + '(-|$)');
-                    if (re.test(item)) turnoLabel = shiftMap[key];
-                });
-                if (!turnoLabel) {
-                    if (et === '19:00' || et === '18:00') turnoLabel = 'DIURNO (SD)';
-                    else if (et === '07:00') turnoLabel = 'NOTURNO (SN)';
-                    else turnoLabel = st + ' as ' + et;
-                }
-
-                doc.setDrawColor(0,0,0); doc.setLineWidth(0.2); doc.setFillColor(255,255,255);
-                doc.rect(14, finalY, 182, 72);
-                doc.setFontSize(11); doc.setFont(undefined, 'bold');
-                doc.text(isPersonal ? "NATUREZA: INVERSAO DE ESCALA (USO PESSOAL)" : "NATUREZA: TROCA DE SERVICO / PLANTAO", 18, finalY+8);
-                doc.text("Local / Unidade: " + localNome, 18, finalY+14);
-                doc.setFontSize(10); doc.setFont(undefined, 'normal');
-
-                if (isPersonal) {
-                    let isTrabalho = item.includes('-SI-');
-                    let after = item.split(isTrabalho ? '-SI-' : '-SO-')[1] || '';
-                    let diaRef = after.split('-')[0];
-                    let dataRefStr = diaRef + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
-                    let dataFolga = isTrabalho ? dataRefStr : dataFormatada;
-                    let dataTrab  = isTrabalho ? dataFormatada : dataRefStr;
-                    doc.text("Profissional: " + profName, 18, finalY+22);
-                    doc.setFont(undefined,'bold'); doc.text("DECLARACAO DE INVERSAO:", 18, finalY+32); doc.setFont(undefined,'normal');
-                    doc.text("- Folga no dia: " + dataFolga, 18, finalY+40);
-                    doc.text("- Compensacao no dia: " + dataTrab, 18, finalY+48);
-                    doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+56);
-                } else {
-                    let isSO = item.includes('-SO-');
-                    let after = item.split(isSO ? '-SO-' : '-SI-')[1] || '';
-                    let diaRef = after.split('-')[0];
-                    let colega = (after.split('-')[1] || 'COLEGA').toUpperCase();
-                    let titular = isSO ? profName : colega;
-                    let substituto = isSO ? colega : profName;
-                    doc.text("Profissional Titular: " + titular, 18, finalY+22);
-                    doc.text("Profissional Substituto: " + substituto, 18, finalY+28);
-                    doc.setFont(undefined,'bold'); doc.text("DECLARACAO DE ACORDO:", 18, finalY+36); doc.setFont(undefined,'normal');
-                    doc.text("- " + substituto + " cumpre o servico no dia: " + dataFormatada, 18, finalY+42);
-                    doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+48);
-                    let dataComp = diaRef + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
-                    doc.text("- " + titular + " compensa no dia: " + dataComp, 18, finalY+54);
-                    doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+60);
-                }
-                finalY += 80;
-                if (finalY > 170) { doc.addPage(); finalY = 20; }
-            });
-
-            finalY += 20;
-            doc.setDrawColor(0,0,0); doc.setLineWidth(0.2);
-            if (isPersonal) {
-                doc.line(65, finalY, 145, finalY); finalY += 5;
-                doc.setFontSize(9); doc.setFont(undefined,'bold');
-                doc.text("Assinatura do Profissional", 105, finalY, { align:"center" });
-            } else {
-                doc.line(20, finalY, 95, finalY); doc.line(115, finalY, 190, finalY); finalY += 5;
-                doc.setFontSize(9); doc.setFont(undefined,'bold');
-                doc.text("Assinatura do Titular", 57.5, finalY, { align:"center" });
-                doc.text("Assinatura do Substituto", 152.5, finalY, { align:"center" });
-            }
-            finalY += 25;
-            doc.line(65, finalY, 145, finalY); finalY += 5;
-            doc.text("Supervisao / Coordenacao", 105, finalY, { align:"center" });
-            doc.setFont(undefined,'normal');
-            doc.text("Carimbo e Assinatura", 105, finalY+4, { align:"center" });
-
-            doc.setFontSize(8); doc.setTextColor(80,80,80);
-            doc.text("Documento gerado pelo sistema Minha Escala PRO. Nao substitui validacao institucional.", 105, 285, { align:"center" });
-
-            window.currentPdfBlob = doc.output('blob');
-            window.currentPdfFilename = "Comprovante_Dia_" + d + ".pdf";
-            if (typeof closeDayDetails === 'function') closeDayDetails();
-            let actModal = document.getElementById('pdfActionModal');
-            if (actModal) actModal.classList.remove('hidden');
+    // 🛡️ CORREÇÃO DE OURO: Filtra as tags de Extra antes de verificar se é pessoal
+    let isPersonal = swaps.length > 0 && swaps.every(function(item) {
+        let clean = item.replace(/-DB/g, '').replace(/-E/g, '');
+        let after = clean.includes('-SI-') ? clean.split('-SI-')[1] : clean.split('-SO-')[1];
+        let col = 'VOCE';
+        if (after) {
+            if (after.includes('~')) col = after.split('~')[1];
+            else if (after.includes('-')) col = after.split('-')[1];
         }
+        return col.toUpperCase() === 'VOCE';
+    });
+
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.setFont(undefined, 'bold');
+    doc.text(isPersonal ? "TERMO DE INVERSAO DE PLANTAO" : "TERMO DE ACORDO DE TROCA", 105, 22, { align: "center" });
+
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    doc.text("DATA DO REGISTRO: " + new Date().toLocaleDateString('pt-BR'), 14, 32);
+    doc.text("CODIGO: ME-PRO-" + Date.now().toString().slice(-6), 14, 38);
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.line(14, 42, 196, 42);
+
+    let finalY = 50;
+
+    swaps.forEach(function(item) {
+        let id = parseInt(item.split('-')[0]);
+        if (!config[id]) return;
+        let localNome = config[id].name.toUpperCase();
+        let st = config[id].startTime || '07:00';
+        let et = config[id].endTime   || '19:00';
+        
+        const shiftMap = { 'SD':'DIURNO (SD)', 'SN':'NOTURNO (SN)', 'M':'MANHA (M)', 'T':'TARDE (T)', 'N':'NOITE (N)' };
+        let turnoLabel = '';
+        Object.keys(shiftMap).forEach(function(key) {
+            var re = new RegExp('(^|-)' + key + '(-|$)');
+            if (re.test(item)) turnoLabel = shiftMap[key];
+        });
+        if (!turnoLabel) {
+            if (et === '19:00' || et === '18:00') turnoLabel = 'DIURNO (SD)';
+            else if (et === '07:00') turnoLabel = 'NOTURNO (SN)';
+            else turnoLabel = st + ' as ' + et;
+        }
+
+        doc.setDrawColor(0,0,0); doc.setLineWidth(0.2); doc.setFillColor(255,255,255);
+        doc.rect(14, finalY, 182, 72);
+        doc.setFontSize(11); doc.setFont(undefined, 'bold');
+        doc.text(isPersonal ? "NATUREZA: INVERSAO DE ESCALA (USO PESSOAL)" : "NATUREZA: TROCA DE SERVICO / PLANTAO", 18, finalY+8);
+        doc.text("Local / Unidade: " + localNome, 18, finalY+14);
+        doc.setFontSize(10); doc.setFont(undefined, 'normal');
+
+        // 🛡️ LIMPEZA DA TAG ANTES DA IMPRESSÃO NO CORPO DO PDF
+        let cleanItem = item.replace(/-DB/g, '').replace(/-E/g, '');
+
+        if (isPersonal) {
+            let isTrabalho = cleanItem.includes('-SI-');
+            let after = cleanItem.split(isTrabalho ? '-SI-' : '-SO-')[1] || '';
+            let diaRef = after.split('~')[0].split('-')[0];
+            let dataRefStr = diaRef + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
+            let dataFolga = isTrabalho ? dataRefStr : dataFormatada;
+            let dataTrab  = isTrabalho ? dataFormatada : dataRefStr;
+            
+            doc.text("Profissional: " + profName, 18, finalY+22);
+            doc.setFont(undefined,'bold'); doc.text("DECLARACAO DE INVERSAO:", 18, finalY+32); doc.setFont(undefined,'normal');
+            doc.text("- Folga no dia: " + dataFolga, 18, finalY+40);
+            doc.text("- Compensacao no dia: " + dataTrab, 18, finalY+48);
+            doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+56);
+        } else {
+            let isSO = cleanItem.includes('-SO-');
+            let after = cleanItem.split(isSO ? '-SO-' : '-SI-')[1] || '';
+            let diaRef = after.split('~')[0].split('-')[0];
+            let colega = 'COLEGA';
+            if (after.includes('~')) colega = after.split('~')[1];
+            else if (after.includes('-')) colega = after.split('-')[1];
+            colega = colega.toUpperCase();
+
+            let titular = isSO ? profName : colega;
+            let substituto = isSO ? colega : profName;
+            
+            doc.text("Profissional Titular: " + titular, 18, finalY+22);
+            doc.text("Profissional Substituto: " + substituto, 18, finalY+28);
+            doc.setFont(undefined,'bold'); doc.text("DECLARACAO DE ACORDO:", 18, finalY+36); doc.setFont(undefined,'normal');
+            doc.text("- " + substituto + " cumpre o servico no dia: " + dataFormatada, 18, finalY+42);
+            doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+48);
+            let dataComp = diaRef + " de " + MONTH_NAMES[currentDate.getMonth()] + " de " + currentDate.getFullYear();
+            doc.text("- " + titular + " compensa no dia: " + dataComp, 18, finalY+54);
+            doc.text("   Horario: " + st + " as " + et + "   |   Turno: " + turnoLabel, 18, finalY+60);
+        }
+        finalY += 80;
+        if (finalY > 170) { doc.addPage(); finalY = 20; }
+    });
+
+    finalY += 10;
+    doc.setFontSize(10); doc.setFont(undefined, 'bold');
+    doc.text("Motivo:", 14, finalY);
+    doc.setFont(undefined, 'normal');
+    doc.line(35, finalY, 196, finalY); finalY += 8;
+    doc.line(14, finalY, 196, finalY); finalY += 14;
+    doc.setDrawColor(0,0,0); doc.setLineWidth(0.2);
+    
+    if (isPersonal) {
+        doc.line(65, finalY, 145, finalY); finalY += 5;
+        doc.setFontSize(9); doc.setFont(undefined,'bold');
+        doc.text("Assinatura do Profissional", 105, finalY, { align:"center" });
+    } else {
+        doc.line(20, finalY, 95, finalY); doc.line(115, finalY, 190, finalY); finalY += 5;
+        doc.setFontSize(9); doc.setFont(undefined,'bold');
+        doc.text("Assinatura do Titular", 57.5, finalY, { align:"center" });
+        doc.text("Assinatura do Substituto", 152.5, finalY, { align:"center" });
+    }
+    finalY += 25;
+    doc.line(65, finalY, 145, finalY); finalY += 5;
+    doc.text("Supervisao / Coordenacao", 105, finalY, { align:"center" });
+    doc.setFont(undefined,'normal');
+    doc.text("Carimbo e Assinatura", 105, finalY+4, { align:"center" });
+
+    doc.setFontSize(8); doc.setTextColor(80,80,80);
+    doc.text("Documento gerado pelo sistema Minha Escala PRO. Nao substitui validacao institucional.", 105, 285, { align:"center" });
+
+    window.currentPdfBlob = doc.output('blob');
+    window.currentPdfFilename = "Comprovante_Dia_" + d + ".pdf";
+    if (typeof closeDayDetails === 'function') closeDayDetails();
+    let actModal = document.getElementById('pdfActionModal');
+    if (actModal) actModal.classList.remove('hidden');
+}
     </script>
 
     <!-- ═══════════════════════════════════════════════════ -->
@@ -4060,7 +4094,7 @@ function setupRealtimeAcordos() {
             if (currentMode === 'swap' || currentMode === 'remote_swap' || currentMode === 'receptor_swap') {
                 exitSpecialModes(); closeSwapHub();
             } else {
-                openSwapHub();
+                resetOtherModes('swap'); openSwapHub();
             }
         }
     </script>
@@ -4101,7 +4135,7 @@ function setupRealtimeAcordos() {
                 style="background: linear-gradient(90deg, transparent, rgba(168,85,247,0.3), transparent)"></div>
 
             <!-- Option 1: Troca Pessoal -->
-            <button onclick="closeSwapHub(); toggleSwapMode();"
+            <button onclick="closeSwapHub(); currentMode = 'swap'; updateStatus();"
                 class="group flex items-center gap-4 p-4 rounded-2xl text-left transition-all active:scale-[0.98]"
                 style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);"
                 onmouseover="this.style.background='rgba(139,92,246,0.12)'; this.style.borderColor='rgba(139,92,246,0.3)'"
@@ -4132,7 +4166,7 @@ function setupRealtimeAcordos() {
                         <span class="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full"
                             style="background: linear-gradient(90deg,#a855f7,#3b82f6); color:white; letter-spacing:0.12em">PRO</span>
                     </div>
-                    <div class="text-slate-400 text-xs mt-0.5">Selecione o dia e gere um QR Code para seu colega</div>
+                    <div class="text-slate-400 text-xs mt-0.5">Selecione o dia e busque o colega no sistema</div>
                 </div>
                 <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-purple-300 transition-colors"></i>
             </button>
@@ -4928,9 +4962,7 @@ function setupRealtimeAcordos() {
                 <button id="btnComprovanteSwap" onclick="gerarComprovanteTroca()" class="hidden w-full py-4 font-black rounded-xl uppercase text-xs tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg" style="background:linear-gradient(135deg,rgba(139,92,246,0.7),rgba(59,130,246,0.6)); border:1px solid rgba(139,92,246,0.6); color:white; box-shadow:0 4px 20px rgba(139,92,246,0.25);">
                     <i class="fa-solid fa-handshake text-lg"></i> Comprovante de Troca
                 </button>
-                <button id="btnComprovanteGeral" onclick="compartilharRelatorioDia()" class="hidden w-full py-4 bg-emerald-600 text-white font-black rounded-xl uppercase text-xs tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg shadow-emerald-900/20">
-                    <i class="fa-brands fa-whatsapp text-lg"></i> Gerar Comprovante
-                </button>
+
                 <button onclick="closeDayDetails()" class="w-full py-3 bg-slate-800 text-slate-400 font-bold rounded-xl uppercase text-[10px] tracking-widest">Voltar ao Calendário</button>
             </div>
         </div>
@@ -4958,7 +4990,18 @@ function setupRealtimeAcordos() {
             if (!list.length) {
                 content.innerHTML = '<p class="text-center text-slate-500 py-10 text-[11px] uppercase tracking-widest font-bold">Nenhum plant\u00e3o neste dia.</p>';
             } else {
-                list.forEach(function(item, idx) {
+                // Expande itens -DB em 2 entradas: normal + extra
+                var expandedList = [];
+                list.forEach(function(item) {
+                    if (item.includes('-DB')) {
+                        var baseItem = item.replace('-DB', '');
+                        expandedList.push(baseItem);
+                        expandedList.push(item);
+                    } else {
+                        expandedList.push(item);
+                    }
+                });
+                expandedList.forEach(function(item, idx) {
                     var id  = parseInt(item.split('-')[0]);
                     if (!config[id]) return;
                     var cfg  = config[id];
@@ -5232,7 +5275,32 @@ function setupRealtimeAcordos() {
                 carregarAcordos();
             }
         }
-    </script>
+    
+        function abrirCentralAjuda() {
+            Swal.fire({
+                title: '<span class="text-white font-black uppercase tracking-widest text-lg"><i class="fa-solid fa-headset text-blue-400 mr-2"></i>Suporte PRO</span>',
+                html: '<div class="text-left mt-4 space-y-3">' +
+                      '<p class="text-slate-400 text-xs mb-4 text-center">Como você prefere contatar nossa equipe técnica?</p>' +
+                      '<button onclick="window.open(\'mailto:suporteminhaescala@gmail.com\', \'_system\')" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"><i class="fa-solid fa-envelope text-lg"></i> Abrir App de E-mail</button>' +
+                      '<button onclick="copiarEmailSuporte()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><i class="fa-solid fa-copy text-lg"></i> Copiar Endereço</button>' +
+                      '</div>',
+                background: '#0f172a', showConfirmButton: false, showCloseButton: true,
+                customClass: { popup: 'rounded-3xl border border-slate-700 shadow-2xl shadow-blue-900/20' }
+            });
+        }
+        function copiarEmailSuporte() {
+            const temp = document.createElement('input');
+            temp.value = 'suporteminhaescala@gmail.com';
+            document.body.appendChild(temp);
+            temp.select(); document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("E-mail copiado!", "success");
+        }
+
+</script>
 </body>
 
 </html>
+
+
+

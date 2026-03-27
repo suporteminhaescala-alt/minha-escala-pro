@@ -4343,14 +4343,6 @@ function setupRealtimeAcordos() {
             });
             if (error) { showToast('Erro ao enviar proposta!', 'error'); console.error(error); return; }
             showToast('Proposta enviada para ' + nomeColega + '!', 'success');
-            try {
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: emailColega,
-                    heading: 'Minha Escala PRO: Nova Proposta 🤝',
-                    message: (appSettings.fullName || currentUser) + ' quer trocar o plantão do dia ' + dia + ' (' + hospital + ') com você. Abra o app para responder.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 1 falhou:', e); }
             closeRemoteSwap();
         }
 
@@ -5239,17 +5231,6 @@ function setupRealtimeAcordos() {
                 resposta_hospital: formValues.hosp
             }).eq('id', id);
             await responderAcordo(id, 'AGUARDANDO_CONFIRMACAO');
-            try {
-                const { data: _ac } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
-                if (_ac) {
-                    await _supabase.functions.invoke('send-push', { body: {
-                        userId: _ac.email_solicitante,
-                        heading: 'Minha Escala PRO: Proposta Aceita! ✅',
-                        message: 'Seu colega aceitou! Ele oferece o dia ' + (_ac.dia_resposta || '?') + ' (' + (_ac.resposta_hospital || '?') + '). Confirme para selar o acordo.',
-                        url: 'https://minha-escala-pro.vercel.app/#app'
-                    }});
-                }
-            } catch(e) { console.warn('Push 2 falhou:', e); }
         }
         async function responderAcordo(id, status) {
             await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
@@ -5315,22 +5296,6 @@ function setupRealtimeAcordos() {
                     }
 
                     showToast('✅ ACORDO FECHADO! Escalas atualizadas.', 'success');
-            try {
-                const _nomeA = acordo.email_solicitante.split('@')[0];
-                const _nomeB = acordo.email_receptor.split('@')[0];
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_receptor,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + acordo.dia_ofertado + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_solicitante,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + (acordo.dia_resposta || '?') + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 3 falhou:', e); }
                     if (typeof Swal !== 'undefined') Swal.close();
                     await syncWithCloud(true);
                     renderCalendar();

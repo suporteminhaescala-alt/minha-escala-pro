@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -317,38 +317,31 @@
                             class="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest underline">Não
                             tem conta? Crie agora</button>
                     </div>
-                
-                <div class="mt-8 pt-6 border-t border-slate-700/50 flex flex-col items-center">
-                    <button type="button" onclick="abrirCentralAjuda()" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
-    <i class="fa-solid fa-headset text-xl text-blue-400"></i>
-    <span class="text-[11px] font-black uppercase tracking-widest">Central de Ajuda</span>
-</button>
-                </div>
                 </form>
 
-                <div id="registerForm" class="hidden flex flex-col items-center py-2 text-center animate-fade-in">
-    <div class="mb-4">
+                <div id="registerForm" class="hidden flex flex-col items-center py-10 text-center animate-fade-in">
+    <div class="mb-6">
         <h3 class="text-white font-bold text-lg uppercase tracking-widest">Novo Cadastro</h3>
         <p class="text-slate-400 text-[10px] uppercase tracking-tighter">Exclusivo via Aplicativo Oficial</p>
     </div>
     
-    <a href="https://play.google.com/store/apps/details?id=com.minhaescala.pro" target="_blank" class="block active:scale-95 transition-transform mb-5">
+    <a href="https://play.google.com/store/apps/details?id=com.minhaescala.pro" target="_blank" class="block active:scale-95 transition-transform">
         <img src="https://play.google.com/intl/en_us/badges/static/images/badges/pt-br_badge_web_generic.png" 
              alt="Disponível no Google Play" 
-             style="width: 180px; height: auto;" class="mx-auto">
+             style="width: 220px; height: auto;">
     </a>
 
-    <div class="bg-[#0B1121] p-2 rounded-xl border border-slate-700 shadow-inner mb-2">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.minhaescala.pro&bgcolor=162032&color=ffffff&margin=2" alt="QR Code Play Store" class="rounded-lg shadow-lg">
-    </div>
-    <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-6">Aponte a câmera para baixar</p>
-
-    <button type="button" onclick="toggleAuthMode('login')" class="text-[10px] text-slate-500 hover:text-white uppercase tracking-widest font-bold border-b border-transparent hover:border-white transition-all">
+    <button type="button" onclick="toggleAuthMode('login')" class="mt-10 text-[10px] text-slate-500 hover:text-white uppercase tracking-widest font-bold border-b border-transparent hover:border-white transition-all">
         Voltar para o Login
     </button>
 </div>
 
-                
+                <div class="mt-8 pt-6 border-t border-slate-700/50 flex flex-col items-center">
+                    <a href="mailto:suporteminhaescala@gmail.com" class="w-full flex items-center justify-center gap-3 py-3 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 rounded-lg text-slate-300 transition-all active:scale-95 group">
+                        <i class="fa-solid fa-envelope text-xl"></i>
+                        <span class="text-[11px] font-black uppercase tracking-widest">Central de Ajuda</span>
+                    </a>
+                </div>
             </div>
         </main>
     </div>
@@ -2323,9 +2316,9 @@ function setupRealtimeAcordos() {
                         monthStats[id].ext++;
                     } else if (type === 'SI') {
                         monthStats[id].work++;
-                        swapDetails.push({ text: `Dia ${day}: Pagamento do ${hospitalName} referente ao dia ${parts[2].split('~')[0]}`, day: day });
+                        swapDetails.push({ text: `Dia ${day}: Pagamento do ${hospitalName} referente ao dia ${parts[2]}`, day: day });
                     } else if (type === 'SO') {
-                        swapDetails.push({ text: `Dia ${day}: Folgou no ${hospitalName} para pagar no dia ${parts[2].split('~')[0]}`, day: day });
+                        swapDetails.push({ text: `Dia ${day}: Folgou no ${hospitalName} para pagar no dia ${parts[2]}`, day: day });
                     } else if (type !== 'V' && !type.includes('OBS')) {
                         monthStats[id].work++;
                     }
@@ -2423,10 +2416,10 @@ function setupRealtimeAcordos() {
                 }
 
                 cell.innerHTML = `
-                    <div class="absolute top-0 left-[3px] z-20">
-                        <span class="block text-[9px] leading-none pt-[2px] font-mono ${isToday ? 'text-yellow-400 font-black' : 'text-slate-300 font-bold'}">${day}</span>
+                    <div class="absolute top-0 left-0 bg-slate-900/80 backdrop-blur-sm px-1 py-0 rounded-br-md z-20 border-b border-r ${isToday ? 'border-yellow-400/50' : 'border-slate-700'}">
+                        <span class="text-[8px] leading-none font-mono ${isToday ? 'text-yellow-400 font-black' : 'text-slate-300 font-bold'}">${day}</span>
                     </div>
-                    <div class="flex flex-col flex-1 h-full w-full ${validShifts.length >= 3 ? 'overflow-y-auto touch-pan-y pointer-events-auto' : 'overflow-hidden'} hide-scroll pt-[4px] z-10">${pillsHTML}</div>`;
+                    <div class="flex flex-col flex-1 h-full w-full ${validShifts.length >= 3 ? 'overflow-y-auto touch-pan-y pointer-events-auto' : 'overflow-hidden'} hide-scroll pt-3 z-10">${pillsHTML}</div>`;
 
                 cell.onclick = () => handleCellClick(dateKey, day);
                 grid.appendChild(cell);
@@ -2475,7 +2468,7 @@ function setupRealtimeAcordos() {
 
             doc.setFontSize(20);
             doc.setTextColor(16, 185, 129);
-            doc.text("MINHA ESCALA PRO - RELATORIO DE ESCALA", 14, 22);
+            doc.text("GESTOR PRO - RELATÓRIO DE ESCALA", 14, 22);
 
             doc.setFontSize(10);
             doc.setTextColor(100);
@@ -2526,7 +2519,7 @@ function setupRealtimeAcordos() {
                     let shouldShow = (isNormal && includeNormal) || (isExtra && includeExtra) || (isSwap && includeSwaps) || (hasNote && includeObs);
                     if (!shouldShow) return;
 
-                    let hospitalName = config[id].name.replace(/[^\x00-\x7F]/g, '').trim();
+                    let hospitalName = config[id].name;
                     let shiftType = '---';
                     if (parts[1] === 'SD') shiftType = 'DIURNO';
                     else if (parts[1] === 'SN') shiftType = 'NOTURNO';
@@ -2596,7 +2589,7 @@ function setupRealtimeAcordos() {
                         doc.setFontSize(10);
                         doc.setTextColor(30, 41, 59);
                         doc.setFont(undefined, 'bold');
-                        doc.text(`> ${cfg.name.replace(/[^\x00-\x7F]/g, "").toUpperCase()}`, 14, finalY);
+                        doc.text(`▶ ${cfg.name.toUpperCase()}`, 14, finalY);
                         finalY += 5;
 
                         doc.setFontSize(9);
@@ -2797,8 +2790,6 @@ function setupRealtimeAcordos() {
                     } else {
                         list[existingIdx] = newParts.join('-');
                     }
-                } else if (item.includes('-SI-') || item.includes('-SO-')) {
-                    list.push(idStr + '-E');
                 } else {
                     list[existingIdx] = item + '-DB';
                 }
@@ -3022,11 +3013,11 @@ function setupRealtimeAcordos() {
                     let suffix = String(swapSourceId).replace(baseId, '').replace('-E', '').replace('-DB', '');
 
                     srcList = srcList.filter(i => parseInt(i.split('-')[0]) !== parseInt(baseId));
-                    srcList.push(`${baseId}-SO-${day}~VOCE${suffix}`);
+                    srcList.push(`${baseId}-SO-${day}${suffix}`);
                     shifts[srcKey] = srcList;
 
                     let targetList = (shifts[dateKey] || []);
-                    targetList.push(`${baseId}-SI-${swapSourceDay}~VOCE${suffix}`);
+                    targetList.push(`${baseId}-SI-${swapSourceDay}${suffix}`);
                     shifts[dateKey] = targetList;
 
                     swapState = 'idle';
@@ -3573,24 +3564,13 @@ function setupRealtimeAcordos() {
             }, 3000);
         }
 
-        async function handleLogout() {
-            try {
-                if (_supabase && currentUser && deviceID) {
-                    await _supabase.from('gp_device_links')
-                        .delete()
-                        .eq('user_email', currentUser)
-                        .eq('device_id', deviceID);
-                }
-            } catch(e) {
-                console.warn('Aviso: vaga nao liberada no servidor.', e);
-            } finally {
-                localStorage.removeItem('app_user_pro');
-                currentUser = null;
-                document.getElementById('username-input').value = '';
-                document.getElementById('password-input').value = '';
-                showScreen('login');
-                showToast("Sessão encerrada com sucesso.", "success");
-            }
+        function handleLogout() {
+            localStorage.removeItem('app_user_pro');
+            currentUser = null;
+            document.getElementById('username-input').value = '';
+            document.getElementById('password-input').value = '';
+            showScreen('login');
+            showToast("Sessão encerrada com sucesso.", "success");
         }
 
         function toggleExtraMode() { resetOtherModes('extra'); }
@@ -4166,7 +4146,7 @@ function setupRealtimeAcordos() {
                         <span class="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full"
                             style="background: linear-gradient(90deg,#a855f7,#3b82f6); color:white; letter-spacing:0.12em">PRO</span>
                     </div>
-                    <div class="text-slate-400 text-xs mt-0.5">Selecione o dia e busque o colega no sistema</div>
+                    <div class="text-slate-400 text-xs mt-0.5">Selecione o dia e gere um QR Code para seu colega</div>
                 </div>
                 <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-purple-300 transition-colors"></i>
             </button>
@@ -4343,14 +4323,6 @@ function setupRealtimeAcordos() {
             });
             if (error) { showToast('Erro ao enviar proposta!', 'error'); console.error(error); return; }
             showToast('Proposta enviada para ' + nomeColega + '!', 'success');
-            try {
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: emailColega,
-                    heading: 'Minha Escala PRO: Nova Proposta 🤝',
-                    message: (appSettings.fullName || currentUser) + ' quer trocar o plantão do dia ' + dia + ' (' + hospital + ') com você. Abra o app para responder.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 1 falhou:', e); }
             closeRemoteSwap();
         }
 
@@ -5023,10 +4995,9 @@ function setupRealtimeAcordos() {
                     } else if (isEx) {
                         badge = '<span class="bg-amber-500 text-black text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">EXTRA</span>';
                     } else if (isSI) {
-                        var _siRaw = item.split('-SI-')[1] || '';
-                        var _siDia = _siRaw.split('~')[0].split('-')[0];
-                        var diaRefSI = _siDia || '?';
-                        var colSI = _siRaw.includes('~') ? _siRaw.split('~')[1].toUpperCase() : (_siRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        var siParts = item.split('-SI-')[1] ? item.split('-SI-')[1].split('-') : [];
+                        var diaRefSI = siParts[0] || '?';
+                        var colSI = (siParts[1] || 'VOCE').toUpperCase();
                         if (colSI === 'VOCE') {
                             badge = '<span class="bg-slate-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">INVERSAO</span>';
                             info  = '<p class="text-[9px] text-slate-300 font-bold mt-1">\u{1F503} Referente ao dia ' + diaRefSI + '</p>';
@@ -5035,10 +5006,9 @@ function setupRealtimeAcordos() {
                             info  = '<p class="text-[9px] text-purple-300 font-bold mt-1">\u{1F91D} Recebido de: ' + colSI + ' - ref. dia ' + diaRefSI + '</p>';
                         }
                     } else if (isSO) {
-                        var _soRaw = item.split('-SO-')[1] || '';
-                        var _soDia = _soRaw.split('~')[0].split('-')[0];
-                        var diaRefSO = _soDia || '?';
-                        var colSO = _soRaw.includes('~') ? _soRaw.split('~')[1].toUpperCase() : (_soRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        var soParts = item.split('-SO-')[1] ? item.split('-SO-')[1].split('-') : [];
+                        var diaRefSO = soParts[0] || '?';
+                        var colSO = (soParts[1] || 'VOCE').toUpperCase();
                         if (colSO === 'VOCE') {
                             badge = '<span class="bg-slate-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded ml-1.5">INVERSAO</span>';
                             info  = '<p class="text-[9px] text-slate-300 font-bold mt-1">\u{1F503} Para pagar no dia ' + diaRefSO + '</p>';
@@ -5072,7 +5042,7 @@ function setupRealtimeAcordos() {
             var hasSwap2 = swapsList.length > 0;
             var isPersonal = hasSwap2 && swapsList.every(function(i){
                 var after = i.includes('-SI-') ? i.split('-SI-')[1] : i.split('-SO-')[1];
-                var col = after && after.includes('~') ? after.split('~')[1] : (after ? after.split('-')[1] : 'VOCE') || 'VOCE';
+                var col = (after ? after.split('-')[1] : 'VOCE') || 'VOCE';
                 return col.toUpperCase() === 'VOCE';
             });
             var btnSwap = document.getElementById('btnComprovanteSwap');
@@ -5166,28 +5136,13 @@ function setupRealtimeAcordos() {
             }
             container.innerHTML = data.map(a => {
                 const isOut = a.email_solicitante === _u;
-                const statusLabel = a.status === 'PENDENTE'
-                    ? (isOut ? 'Solicitação enviada. Aguardando resposta.' : 'Você recebeu uma solicitação de troca.')
-                    : a.status === 'ACEITO' ? 'Acordo realizado com sucesso.'
-                    : a.status === 'RECUSADO' ? 'Solicitação não aceita.'
-                    : a.status === 'CONTRAPROPOSTA' ? 'Seu colega enviou uma contraproposta.' : a.status === 'AGUARDANDO_CONFIRMACAO' ? (isOut ? 'Colega aceitou! Confirme a troca para selar o acordo.' : 'Aguardando confirmacao do colega...')
-                    : a.status;
                 let botoesHTML = '';
                 
                 if (!isOut && a.status === 'PENDENTE') {
                     botoesHTML = '<div class="flex gap-2 mt-4">' +
-                        '<button onclick="aceitarAcordo(\'' + a.id + '\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">ACEITAR E INFORMAR MEU DIA</button>' +
-                        '<button onclick="abrirContraproposta(\'' + a.id + '\')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase">ENVIAR CONTRAPROPOSTA</button>' +
-                        '<button onclick="responderAcordo(\'' + a.id + '\',\'RECUSADO\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">RECUSAR SOLICITAÇÃO</button>' +
-                    '</div>';
-                } else if (isOut && a.status === 'AGUARDANDO_CONFIRMACAO') {
-                    botoesHTML = '<div class="bg-emerald-900/30 border border-emerald-500/30 p-3 rounded-lg mt-3">' +
-                        '<div class="text-emerald-400 text-[10px] font-black uppercase mb-1">✅ Colega aceitou sua proposta!</div>' +
-                        '<div class="text-white text-xs font-bold mb-3">Ele oferece o Dia ' + (a.dia_resposta || '?') + ' — ' + (a.resposta_hospital || '?') + '</div>' +
-                        '<div class="flex gap-2">' +
-                            '<button onclick="responderAcordo(\'' + a.id + '\',\'ACEITO\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">✅ CONFIRMAR TROCA</button>' +
-                            '<button onclick="responderAcordo(\'' + a.id + '\',\'RECUSADO\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">❌ RECUSAR</button>' +
-                        '</div>' +
+                        '<button onclick="responderAcordo(\'' + a.id + '\',\'ACEITO\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">Aceitar</button>' +
+                        '<button onclick="abrirContraproposta(\'' + a.id + '\')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase">Contraproposta</button>' +
+                        '<button onclick="responderAcordo(\'' + a.id + '\',\'RECUSADO\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">Recusar</button>' +
                     '</div>';
                 } else if (isOut && a.status === 'CONTRAPROPOSTA') {
                     botoesHTML = '<div class="bg-indigo-900/30 border border-indigo-500/30 p-3 rounded-lg mt-3">' +
@@ -5203,7 +5158,7 @@ function setupRealtimeAcordos() {
                 return '<div class="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 mb-3 text-left">' +
                     '<div class="flex justify-between mb-2">' +
                         '<span class="text-[9px] font-black uppercase ' + (isOut ? 'text-blue-400' : 'text-purple-400') + '">' + (isOut ? '📤 Enviada' : '📥 Recebida') + '</span>' +
-                        '<span class="text-[9px] font-bold text-slate-400 uppercase">' + statusLabel + '</span>' +
+                        '<span class="text-[9px] font-bold text-slate-400 uppercase">' + a.status + '</span>' +
                     '</div>' +
                     '<div class="text-sm font-bold text-white">Dia ' + a.dia_ofertado + ' - ' + (a.hospital_ofertado || '') + '</div>' +
                     '<div class="text-[10px] text-slate-400 mt-1">' + (isOut ? 'Para: ' + a.email_receptor : 'De: ' + a.email_solicitante) + '</div>' +
@@ -5212,45 +5167,6 @@ function setupRealtimeAcordos() {
             }).join('');
         }
 
-        async function aceitarAcordo(id) {
-            const { value: formValues } = await Swal.fire({
-                title: '<span class="text-white text-sm font-black uppercase">Qual dia você vai cobrir?</span>',
-                html: '<div class="text-left mt-2">' +
-                    '<p class="text-slate-400 text-[10px] mb-3">Informe qual dia você oferece em troca:</p>' +
-                    '<label class="text-slate-400 text-[10px] font-bold uppercase">Dia do Plantão:</label>' +
-                    '<input id="swal-dia-resp" type="number" min="1" max="31" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white mb-3" placeholder="Ex: 15">' +
-                    '<label class="text-slate-400 text-[10px] font-bold uppercase">Hospital:</label>' +
-                    '<input id="swal-hosp-resp" type="text" class="w-full p-3 bg-slate-900 border border-slate-700 rounded-lg text-white" placeholder="Ex: HSD">' +
-                    '</div>',
-                background: '#0f172a', showCancelButton: true,
-                confirmButtonText: 'ACEITAR TROCA', confirmButtonColor: '#059669',
-                cancelButtonText: 'Cancelar',
-                customClass: { popup: 'rounded-3xl border border-slate-700' },
-                preConfirm: () => {
-                    const dia = document.getElementById('swal-dia-resp').value;
-                    const hosp = document.getElementById('swal-hosp-resp').value;
-                    if (!dia || !hosp) { Swal.showValidationMessage('Preencha dia e hospital'); return false; }
-                    return { dia, hosp };
-                }
-            });
-            if (!formValues) return;
-            await _supabase.from('gp_acordos').update({
-                dia_resposta: formValues.dia,
-                resposta_hospital: formValues.hosp
-            }).eq('id', id);
-            await responderAcordo(id, 'AGUARDANDO_CONFIRMACAO');
-            try {
-                const { data: _ac } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
-                if (_ac) {
-                    await _supabase.functions.invoke('send-push', { body: {
-                        userId: _ac.email_solicitante,
-                        heading: 'Minha Escala PRO: Proposta Aceita! ✅',
-                        message: 'Seu colega aceitou! Ele oferece o dia ' + (_ac.dia_resposta || '?') + ' (' + (_ac.resposta_hospital || '?') + '). Confirme para selar o acordo.',
-                        url: 'https://minha-escala-pro.vercel.app/#app'
-                    }});
-                }
-            } catch(e) { console.warn('Push 2 falhou:', e); }
-        }
         async function responderAcordo(id, status) {
             await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
 
@@ -5285,28 +5201,16 @@ function setupRealtimeAcordos() {
                         const { data: bkSol } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailSol).eq('month_key', monthKey).maybeSingle();
                         const shiftsSol = (bkSol && bkSol.data) ? Object.assign({}, bkSol.data) : {};
                         if (!shiftsSol[dateKey]) shiftsSol[dateKey] = [];
-                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
-                        const diaRespStr = String(acordo.dia_resposta || diaRef).padStart(2,'0');
-                        const dateKeyResp = ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaRespStr;
-                        const nomeRec = emailRec.split('@')[0].substring(0,6).toUpperCase();
-                        const nomeSol = emailSol.split('@')[0].substring(0,6).toUpperCase();
-                        shiftsSol[dateKey] = (shiftsSol[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
-                        shiftsSol[dateKey].push(hospIdSol + '-SO-' + parseInt(diaRespStr) + '~' + nomeRec);
-                        if (!shiftsSol[dateKeyResp]) shiftsSol[dateKeyResp] = [];
-                        shiftsSol[dateKeyResp] = shiftsSol[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
-                        shiftsSol[dateKeyResp].push(hospIdSol + '-SI-' + parseInt(diaRef) + '~' + nomeRec);
+                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => !String(i).startsWith(hospIdSol + '-'));
+                        shiftsSol[dateKey].push(hospIdSol + '-SO-' + parseInt(diaRef) + '~' + emailRec.split('@')[0].substring(0,6).toUpperCase());
                         await _supabase.from('gp_backup').upsert({ owner_id: emailSol, month_key: monthKey, data: shiftsSol, updated_at: new Date().toISOString() }, { onConflict: 'owner_id, month_key' });
 
                         // Atualiza receptor: planta -SI- (recebeu o dia)
                         const { data: bkRec } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailRec).eq('month_key', monthKey).maybeSingle();
                         const shiftsRec = (bkRec && bkRec.data) ? Object.assign({}, bkRec.data) : {};
                         if (!shiftsRec[dateKey]) shiftsRec[dateKey] = [];
-                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
-                        shiftsRec[dateKey] = (shiftsRec[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
-                        shiftsRec[dateKey].push(hospIdRec + '-SI-' + parseInt(diaRespStr) + '~' + nomeSol);
-                        if (!shiftsRec[dateKeyResp]) shiftsRec[dateKeyResp] = [];
-                        shiftsRec[dateKeyResp] = shiftsRec[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
-                        shiftsRec[dateKeyResp].push(hospIdRec + '-SO-' + parseInt(diaRef) + '~' + nomeSol);
+                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => !String(i).startsWith(hospIdRec + '-'));
+                        shiftsRec[dateKey].push(hospIdRec + '-SI-' + parseInt(diaRef) + '~' + emailSol.split('@')[0].substring(0,6).toUpperCase());
                         await _supabase.from('gp_backup').upsert({ owner_id: emailRec, month_key: monthKey, data: shiftsRec, updated_at: new Date().toISOString() }, { onConflict: 'owner_id, month_key' });
 
                         // Se usuario atual e o receptor, atualiza memoria local
@@ -5315,22 +5219,6 @@ function setupRealtimeAcordos() {
                     }
 
                     showToast('✅ ACORDO FECHADO! Escalas atualizadas.', 'success');
-            try {
-                const _nomeA = acordo.email_solicitante.split('@')[0];
-                const _nomeB = acordo.email_receptor.split('@')[0];
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_receptor,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + acordo.dia_ofertado + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_solicitante,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + (acordo.dia_resposta || '?') + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 3 falhou:', e); }
                     if (typeof Swal !== 'undefined') Swal.close();
                     await syncWithCloud(true);
                     renderCalendar();
@@ -5367,32 +5255,7 @@ function setupRealtimeAcordos() {
                 carregarAcordos();
             }
         }
-    
-        function abrirCentralAjuda() {
-            Swal.fire({
-                title: '<span class="text-white font-black uppercase tracking-widest text-lg"><i class="fa-solid fa-headset text-blue-400 mr-2"></i>Suporte PRO</span>',
-                html: '<div class="text-left mt-4 space-y-3">' +
-                      '<p class="text-slate-400 text-xs mb-4 text-center">Como você prefere contatar nossa equipe técnica?</p>' +
-                      '<button onclick="window.open(\'mailto:suporteminhaescala@gmail.com\', \'_system\')" class="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl text-white font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg"><i class="fa-solid fa-envelope text-lg"></i> Abrir App de E-mail</button>' +
-                      '<button onclick="copiarEmailSuporte()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl text-slate-300 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all active:scale-95"><i class="fa-solid fa-copy text-lg"></i> Copiar Endereço</button>' +
-                      '</div>',
-                background: '#0f172a', showConfirmButton: false, showCloseButton: true,
-                customClass: { popup: 'rounded-3xl border border-slate-700 shadow-2xl shadow-blue-900/20' }
-            });
-        }
-        function copiarEmailSuporte() {
-            const temp = document.createElement('input');
-            temp.value = 'suporteminhaescala@gmail.com';
-            document.body.appendChild(temp);
-            temp.select(); document.execCommand('copy');
-            document.body.removeChild(temp);
-            showToast("E-mail copiado!", "success");
-        }
-
-</script>
+    </script>
 </body>
 
 </html>
-
-
-

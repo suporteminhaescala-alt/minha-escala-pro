@@ -4343,14 +4343,6 @@ function setupRealtimeAcordos() {
             });
             if (error) { showToast('Erro ao enviar proposta!', 'error'); console.error(error); return; }
             showToast('Proposta enviada para ' + nomeColega + '!', 'success');
-            try {
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: emailColega,
-                    heading: 'Minha Escala PRO: Nova Proposta 🤝',
-                    message: (appSettings.fullName || currentUser) + ' quer trocar o plantão do dia ' + dia + ' (' + hospital + ') com você. Abra o app para responder.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 1 falhou:', e); }
             closeRemoteSwap();
         }
 
@@ -5170,7 +5162,7 @@ function setupRealtimeAcordos() {
                     ? (isOut ? 'Solicitação enviada. Aguardando resposta.' : 'Você recebeu uma solicitação de troca.')
                     : a.status === 'ACEITO' ? 'Acordo realizado com sucesso.'
                     : a.status === 'RECUSADO' ? 'Solicitação não aceita.'
-                    : a.status === 'CONTRAPROPOSTA' ? 'Seu colega enviou uma contraproposta.' : a.status === 'AGUARDANDO_CONFIRMACAO' ? (isOut ? 'Colega aceitou! Confirme a troca para selar o acordo.' : 'Aguardando confirmacao do colega...')
+                    : a.status === 'CONTRAPROPOSTA' ? 'Seu colega enviou uma contraproposta.'
                     : a.status;
                 let botoesHTML = '';
                 
@@ -5179,15 +5171,6 @@ function setupRealtimeAcordos() {
                         '<button onclick="aceitarAcordo(\'' + a.id + '\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">ACEITAR E INFORMAR MEU DIA</button>' +
                         '<button onclick="abrirContraproposta(\'' + a.id + '\')" class="flex-1 py-2 bg-indigo-600 rounded-lg text-[10px] text-white font-black uppercase">ENVIAR CONTRAPROPOSTA</button>' +
                         '<button onclick="responderAcordo(\'' + a.id + '\',\'RECUSADO\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">RECUSAR SOLICITAÇÃO</button>' +
-                    '</div>';
-                } else if (isOut && a.status === 'AGUARDANDO_CONFIRMACAO') {
-                    botoesHTML = '<div class="bg-emerald-900/30 border border-emerald-500/30 p-3 rounded-lg mt-3">' +
-                        '<div class="text-emerald-400 text-[10px] font-black uppercase mb-1">✅ Colega aceitou sua proposta!</div>' +
-                        '<div class="text-white text-xs font-bold mb-3">Ele oferece o Dia ' + (a.dia_resposta || '?') + ' — ' + (a.resposta_hospital || '?') + '</div>' +
-                        '<div class="flex gap-2">' +
-                            '<button onclick="responderAcordo(\'' + a.id + '\',\'ACEITO\')" class="flex-1 py-2 bg-emerald-600 rounded-lg text-[10px] text-white font-black uppercase">✅ CONFIRMAR TROCA</button>' +
-                            '<button onclick="responderAcordo(\'' + a.id + '\',\'RECUSADO\')" class="flex-1 py-2 bg-slate-700 rounded-lg text-[10px] text-slate-300 font-black uppercase">❌ RECUSAR</button>' +
-                        '</div>' +
                     '</div>';
                 } else if (isOut && a.status === 'CONTRAPROPOSTA') {
                     botoesHTML = '<div class="bg-indigo-900/30 border border-indigo-500/30 p-3 rounded-lg mt-3">' +
@@ -5238,18 +5221,7 @@ function setupRealtimeAcordos() {
                 dia_resposta: formValues.dia,
                 resposta_hospital: formValues.hosp
             }).eq('id', id);
-            await responderAcordo(id, 'AGUARDANDO_CONFIRMACAO');
-            try {
-                const { data: _ac } = await _supabase.from('gp_acordos').select('*').eq('id', id).maybeSingle();
-                if (_ac) {
-                    await _supabase.functions.invoke('send-push', { body: {
-                        userId: _ac.email_solicitante,
-                        heading: 'Minha Escala PRO: Proposta Aceita! ✅',
-                        message: 'Seu colega aceitou! Ele oferece o dia ' + (_ac.dia_resposta || '?') + ' (' + (_ac.resposta_hospital || '?') + '). Confirme para selar o acordo.',
-                        url: 'https://minha-escala-pro.vercel.app/#app'
-                    }});
-                }
-            } catch(e) { console.warn('Push 2 falhou:', e); }
+            await responderAcordo(id, 'ACEITO');
         }
         async function responderAcordo(id, status) {
             await _supabase.from('gp_acordos').update({ status: status }).eq('id', id);
@@ -5285,12 +5257,12 @@ function setupRealtimeAcordos() {
                         const { data: bkSol } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailSol).eq('month_key', monthKey).maybeSingle();
                         const shiftsSol = (bkSol && bkSol.data) ? Object.assign({}, bkSol.data) : {};
                         if (!shiftsSol[dateKey]) shiftsSol[dateKey] = [];
-                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
+                        shiftsSol[dateKey] = shiftsSol[dateKey].filter(i => !String(i).startsWith(hospIdSol + '-'));
                         const diaRespStr = String(acordo.dia_resposta || diaRef).padStart(2,'0');
                         const dateKeyResp = ano + '-' + String(mes+1).padStart(2,'0') + '-' + diaRespStr;
                         const nomeRec = emailRec.split('@')[0].substring(0,6).toUpperCase();
                         const nomeSol = emailSol.split('@')[0].substring(0,6).toUpperCase();
-                        shiftsSol[dateKey] = (shiftsSol[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
+                        shiftsSol[dateKey] = (shiftsSol[dateKey] || []).filter(i => !String(i).startsWith(hospIdSol + '-'));
                         shiftsSol[dateKey].push(hospIdSol + '-SO-' + parseInt(diaRespStr) + '~' + nomeRec);
                         if (!shiftsSol[dateKeyResp]) shiftsSol[dateKeyResp] = [];
                         shiftsSol[dateKeyResp] = shiftsSol[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdSol));
@@ -5301,8 +5273,8 @@ function setupRealtimeAcordos() {
                         const { data: bkRec } = await _supabase.from('gp_backup').select('data').eq('owner_id', emailRec).eq('month_key', monthKey).maybeSingle();
                         const shiftsRec = (bkRec && bkRec.data) ? Object.assign({}, bkRec.data) : {};
                         if (!shiftsRec[dateKey]) shiftsRec[dateKey] = [];
-                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
-                        shiftsRec[dateKey] = (shiftsRec[dateKey] || []).filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
+                        shiftsRec[dateKey] = shiftsRec[dateKey].filter(i => !String(i).startsWith(hospIdRec + '-'));
+                        shiftsRec[dateKey] = (shiftsRec[dateKey] || []).filter(i => !String(i).startsWith(hospIdRec + '-'));
                         shiftsRec[dateKey].push(hospIdRec + '-SI-' + parseInt(diaRespStr) + '~' + nomeSol);
                         if (!shiftsRec[dateKeyResp]) shiftsRec[dateKeyResp] = [];
                         shiftsRec[dateKeyResp] = shiftsRec[dateKeyResp].filter(i => parseInt(String(i).split('-')[0]) !== parseInt(hospIdRec));
@@ -5315,22 +5287,6 @@ function setupRealtimeAcordos() {
                     }
 
                     showToast('✅ ACORDO FECHADO! Escalas atualizadas.', 'success');
-            try {
-                const _nomeA = acordo.email_solicitante.split('@')[0];
-                const _nomeB = acordo.email_receptor.split('@')[0];
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_receptor,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + acordo.dia_ofertado + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-                await _supabase.functions.invoke('send-push', { body: {
-                    userId: acordo.email_solicitante,
-                    heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
-                    message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + (acordo.dia_resposta || '?') + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
-                }});
-            } catch(e) { console.warn('Push 3 falhou:', e); }
                     if (typeof Swal !== 'undefined') Swal.close();
                     await syncWithCloud(true);
                     renderCalendar();
