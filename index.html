@@ -2409,11 +2409,11 @@ function setupRealtimeAcordos() {
                         if (normalShiftLabel) sub = "EXTRA"; else icon = '<i class="fas fa-star text-amber-300 ml-1"></i>';
                     }
 
-                    let subBadge = sub ? `<div class='${sub.includes("EXTRA") ? "dobra-badge" : "text-[6px] font-black bg-black/40 px-[2px] py-[0px] rounded mt-[0px] tracking-tight leading-none"}' >${sub}</div>` : '';
+                    let subBadge = sub ? `<div class='${sub.includes("EXTRA") ? "dobra-badge" : "text-[8px] font-black bg-black/40 px-[4px] py-[2px] rounded mt-[1px] tracking-wide leading-tight"}' >${sub}</div>` : '';
                     let inlineShift = normalShiftLabel ? `<span class="text-[5px] text-yellow-300 font-black tracking-tight leading-none">${normalShiftLabel}</span>` : '';
 
                     pillsHTML += `
-                        <div class="w-full h-[22px] min-h-[22px] shrink-0 flex flex-col items-center justify-center rounded text-[8px] leading-none font-black uppercase shadow-sm p-[1px] text-center whitespace-nowrap overflow-hidden ${bg} ${border} mb-[1px] last:mb-0 relative text-white tracking-tighter">
+                        <div class="w-full min-h-[26px] h-auto py-[3px] shrink-0 flex flex-col items-center justify-center rounded text-[8px] leading-none font-black uppercase shadow-sm px-[2px] text-center whitespace-nowrap overflow-hidden ${bg} ${border} mb-[1px] last:mb-0 relative text-white tracking-tighter">
                             <div class="${textClass} flex items-center justify-center flex-nowrap leading-[1] gap-x-0.5">${icon}<span class="truncate text-[10px] font-black">${cfg.name}</span>${inlineShift}</div>
                             ${subBadge}
                         </div>`;
@@ -2681,82 +2681,47 @@ function setupRealtimeAcordos() {
         }
 
         async function viewPDF() {
-            if (window.currentPdfBlob) {
-                const fileName = window.currentPdfFilename || 'relatorio.pdf';
-                if (window.Capacitor && window.Capacitor.Plugins) {
-                    const Filesystem = window.Capacitor.Plugins.Filesystem;
-                    const FileOpener = window.Capacitor.Plugins.FileOpener;
-                    if (Filesystem && FileOpener) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(window.currentPdfBlob);
-                        reader.onloadend = async function () {
-                            try {
-                                const base64data = reader.result.split(',')[1];
-                                const writeFileResult = await Filesystem.writeFile({
-                                    path: fileName,
-                                    data: base64data,
-                                    directory: 'CACHE'
-                                });
-                                await FileOpener.open({
-                                    filePath: writeFileResult.uri,
-                                    contentType: 'application/pdf',
-                                    openWithDefault: false,
-                                    showOpenWithDialog: true
-                                });
-                            } catch (e2) {
-                                alert("Erro ao abrir PDF nativo: " + e2.message);
-                            }
-                        };
-                        return;
-                    }
-                }
-                if (window.currentPdfBlob) { window.open(URL.createObjectURL(window.currentPdfBlob), "_blank"); } else { alert("Gere o comprovante primeiro."); }
-            }
+            if (!window.currentPdfBlob) { alert("Gere o comprovante primeiro."); return; }
+            const fileName = window.currentPdfFilename || 'relatorio.pdf';
+            const _abrirFallback = () => { window.open(URL.createObjectURL(window.currentPdfBlob), "_blank"); };
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.FileOpener) {
+                const Filesystem = window.Capacitor.Plugins.Filesystem;
+                const FileOpener = window.Capacitor.Plugins.FileOpener;
+                const reader = new FileReader();
+                reader.readAsDataURL(window.currentPdfBlob);
+                reader.onloadend = async function () {
+                    try {
+                        const base64data = reader.result.split(',')[1];
+                        const writeFileResult = await Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
+                        await FileOpener.open({ filePath: writeFileResult.uri, contentType: 'application/pdf', openWithDefault: false, showOpenWithDialog: true });
+                    } catch (e2) { console.warn('FileOpener falhou, abrindo fallback:', e2); _abrirFallback(); }
+                };
+            } else { _abrirFallback(); }
         }
 
         async function sharePDF() {
-            if (window.currentPdfBlob) {
-                const fileName = window.currentPdfFilename || 'relatorio.pdf';
-                if (window.Capacitor && window.Capacitor.Plugins) {
-                    const Filesystem = window.Capacitor.Plugins.Filesystem;
-                    const Share = window.Capacitor.Plugins.Share;
-                    if (Filesystem && Share) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(window.currentPdfBlob);
-                        reader.onloadend = async function () {
-                            try {
-                                const base64data = reader.result.split(',')[1];
-                                const writeFileResult = await Filesystem.writeFile({
-                                    path: fileName,
-                                    data: base64data,
-                                    directory: 'CACHE'
-                                });
-                                await Share.share({
-                                    title: 'Escala Gestor Pro',
-                                    text: 'Segue a minha escala de plantões em anexo.',
-                                    url: writeFileResult.uri,
-                                    files: [writeFileResult.uri],
-                                    dialogTitle: 'Compartilhar Relatório'
-                                });
-                            } catch (e2) {
-                                alert("Erro ao compartilhar PDF nativo: " + e2.message);
-                            }
-                        };
-                        return;
-                    }
-                }
+            if (!window.currentPdfBlob) { alert("Gere o comprovante primeiro."); return; }
+            const fileName = window.currentPdfFilename || 'relatorio.pdf';
+            const _compartilharFallback = async () => {
                 const file = new File([window.currentPdfBlob], fileName, { type: 'application/pdf' });
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    try { await navigator.share({ title: 'Minha Escala PRO', text: 'Segue a minha escala de plantões em anexo.', files: [file] }); showToast("PDF Compartilhado!", "success"); }
+                    catch (error) { console.log('Erro ao compartilhar web:', error); }
+                } else { alert("Compartilhamento não suportado neste dispositivo."); }
+            };
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share) {
+                const Filesystem = window.Capacitor.Plugins.Filesystem;
+                const Share = window.Capacitor.Plugins.Share;
+                const reader = new FileReader();
+                reader.readAsDataURL(window.currentPdfBlob);
+                reader.onloadend = async function () {
                     try {
-                        await navigator.share({ title: 'Escala Gestor Pro', text: 'Segue a minha escala de plantões em anexo.', files: [file] });
-                        showToast("PDF Compartilhado!", "success");
-                    } catch (error) {
-                        console.log('Erro ao compartilhar web:', error);
-                    }
-                } else {
-                    alert("O compartilhamento de arquivos não é suportado no seu dispositivo atual.");
-                }
-            }
+                        const base64data = reader.result.split(',')[1];
+                        const writeFileResult = await Filesystem.writeFile({ path: fileName, data: base64data, directory: 'CACHE' });
+                        await Share.share({ title: 'Minha Escala PRO', text: 'Segue a minha escala de plantões em anexo.', url: writeFileResult.uri, files: [writeFileResult.uri], dialogTitle: 'Compartilhar Relatório' });
+                    } catch (e2) { console.warn('Share plugin falhou, abrindo fallback:', e2); await _compartilharFallback(); }
+                };
+            } else { await _compartilharFallback(); }
         }
 
                 async function _executarDesfazerTroca() {
