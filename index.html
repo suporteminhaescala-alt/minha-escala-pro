@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-<head><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<head>
+    <script>
+        // MATA CACHE ZUMBI
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(x => x.unregister())); }
+        if (window.caches) { caches.keys().then(k => k.forEach(c => caches.delete(c))); }
+    </script><script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <meta charset="UTF-8">
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1640,9 +1645,9 @@
             if (swaps.length > 0) {
                 swaps.sort((a, b) => a.day - b.day).forEach(d => {
                     sc.innerHTML += `
-                        <div class="border-b border-slate-700/50 flex gap-2 mb-1">
-                            <i class="fas fa-exchange-alt ${d.text.includes("Pagamento") ? "text-purple-400" : "text-slate-400"} mt-0.5 text-[10px]"></i>
-                            <span class="text-[10px] text-slate-300 uppercase tracking-tight">${d.text}</span>
+                        <div class="border-b border-slate-700/50 flex gap-2 mb-2 pb-1">
+                            <i class="fas fa-exchange-alt ${d.isSI ? "text-purple-400" : "text-slate-400"} mt-0.5 text-[10px]"></i>
+                            <span class="text-[10px] text-slate-300 uppercase tracking-tight leading-tight"><span class="font-bold text-emerald-400 mr-1">DIA ${d.day}:</span> ${d.text}</span>
                         </div>`;
                 });
             }
@@ -2338,9 +2343,25 @@ function setupRealtimeAcordos() {
                         monthStats[id].ext++;
                     } else if (type === 'SI') {
                         monthStats[id].work++;
-                        swapDetails.push({ text: `Dia ${day}: Pagamento do ${hospitalName} referente ao dia ${parts[2].split('~')[0]}`, day: day });
+                        let afterRaw = item.split('-SI-')[1] || '';
+                        let diaRef = afterRaw.split('~')[0].split('-')[0] || '?';
+                        let colega = afterRaw.includes('~') ? afterRaw.split('~')[1].toUpperCase() : (afterRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        
+                        if (colega === 'VOCE') {
+                            swapDetails.push({ text: `INVERSÃO DE TURNO (${hospitalName}) - REFERENTE AO DIA ${diaRef}`, day: day, isSI: true });
+                        } else {
+                            swapDetails.push({ text: `🤝 TROCA COM ${colega} (${hospitalName}) - VOCÊ TRABALHA (REF. DIA ${diaRef})`, day: day, isSI: true });
+                        }
                     } else if (type === 'SO') {
-                        swapDetails.push({ text: `Dia ${day}: Folgou no ${hospitalName} para pagar no dia ${parts[2].split('~')[0]}`, day: day });
+                        let afterRaw = item.split('-SO-')[1] || '';
+                        let diaRef = afterRaw.split('~')[0].split('-')[0] || '?';
+                        let colega = afterRaw.includes('~') ? afterRaw.split('~')[1].toUpperCase() : (afterRaw.split('-')[1] || 'VOCE').toUpperCase();
+                        
+                        if (colega === 'VOCE') {
+                            swapDetails.push({ text: `FOLGA PROGRAMADA (${hospitalName}) - TURNO REMANEJADO PARA O DIA ${diaRef}`, day: day, isSI: false });
+                        } else {
+                            swapDetails.push({ text: `🤝 TROCA COM ${colega} (${hospitalName}) - ${colega} TRABALHA (REF. DIA ${diaRef})`, day: day, isSI: false });
+                        }
                     } else if (type !== 'V' && !type.includes('OBS')) {
                         monthStats[id].work++;
                     }
@@ -5052,10 +5073,7 @@ function setupRealtimeAcordos() {
                                     '</div>' + info +
                                 '</div>' +
                             '</div>' +
-                            '<button data-idx="' + idx + '" onclick="removerDoDiaModal(this.dataset.idx)" class="w-9 h-9 rounded-full bg-red-900/30 text-red-400 flex items-center justify-center shrink-0 ml-2 active:scale-90 transition-transform">' +
-                                '<i class="fa-solid fa-trash-can text-xs"></i>' +
-                            '</button>' +
-                        '</div>';
+                            '</div>';
                 });
             }
             var swapsList = list.filter(function(i){ return i.includes('-SI-') || i.includes('-SO-'); });
