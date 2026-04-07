@@ -4359,7 +4359,7 @@ function setupRealtimeAcordos() {
                     userId: emailColega,
                     heading: 'Minha Escala PRO: Nova Proposta 🤝',
                     message: (appSettings.fullName || currentUser) + ' quer trocar o plantão do dia ' + dia + ' (' + hospital + ') com você. Abra o app para responder.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
+                    url: 'https://minha-escala-pro.vercel.app/#app', priority: 10, android_channel_id: 'fcm_fallback_notification_channel', android_visibility: 1
                 }});
             } catch(e) { console.warn('Push 1 falhou:', e); }
             closeRemoteSwap();
@@ -5324,8 +5324,7 @@ function setupRealtimeAcordos() {
                         '<span class="text-[9px] font-black uppercase ' + (isOut ? 'text-blue-400' : 'text-purple-400') + '">' + (isOut ? '📤 Enviada' : '📥 Recebida') + '</span>' +
                         '<span class="text-[9px] font-bold text-slate-400 uppercase">' + statusLabel + '</span>' +
                     '</div>' +
-                    '<div class="text-sm font-bold text-white">Dia ' + a.dia_ofertado + ' - ' + (a.hospital_ofertado || '') + '</div>' +
-                    '<div class="text-[10px] text-slate-400 mt-1">' + (isOut ? 'Para: ' + a.email_receptor : 'De: ' + a.email_solicitante) + '</div>' +
+                    '<div class="text-[11px] text-slate-300 mt-2 mb-2 leading-relaxed">Referente ao plantão do <span class="text-white font-bold">Dia ' + a.dia_ofertado + ' (' + (a.hospital_ofertado || '') + ')</span><br>' + (isOut ? 'Enviado para: <span class="text-blue-400 font-bold uppercase">' + a.email_receptor.split('@')[0] + '</span>' : 'Recebido de: <span class="text-purple-400 font-bold uppercase">' + a.email_solicitante.split('@')[0] + '</span>') + '</div>' +
                     botoesHTML +
                 '</div>';
             }).join('');
@@ -5365,7 +5364,7 @@ function setupRealtimeAcordos() {
                         userId: _ac.email_solicitante,
                         heading: 'Minha Escala PRO: Proposta Aceita! ✅',
                         message: 'Seu colega aceitou! Ele oferece o dia ' + (_ac.dia_resposta || '?') + ' (' + (_ac.resposta_hospital || '?') + '). Confirme para selar o acordo.',
-                        url: 'https://minha-escala-pro.vercel.app/#app'
+                        url: 'https://minha-escala-pro.vercel.app/#app', priority: 10, android_channel_id: 'fcm_fallback_notification_channel', android_visibility: 1
                     }});
                 }
             } catch(e) { console.warn('Push 2 falhou:', e); }
@@ -5441,13 +5440,13 @@ function setupRealtimeAcordos() {
                     userId: acordo.email_receptor,
                     heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
                     message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + acordo.dia_ofertado + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
+                    url: 'https://minha-escala-pro.vercel.app/#app', priority: 10, android_channel_id: 'fcm_fallback_notification_channel', android_visibility: 1
                 }});
                 await _supabase.functions.invoke('send-push', { body: {
                     userId: acordo.email_solicitante,
                     heading: 'Minha Escala PRO: Acordo Fechado! 🎉',
                     message: 'O acordo foi confirmado! Sua escala foi atualizada com o plantão do dia ' + (acordo.dia_resposta || '?') + '.',
-                    url: 'https://minha-escala-pro.vercel.app/#app'
+                    url: 'https://minha-escala-pro.vercel.app/#app', priority: 10, android_channel_id: 'fcm_fallback_notification_channel', android_visibility: 1
                 }});
             } catch(e) { console.warn('Push 3 falhou:', e); }
                     if (typeof Swal !== 'undefined') Swal.close();
